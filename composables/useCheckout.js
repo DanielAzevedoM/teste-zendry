@@ -1,15 +1,15 @@
-// composables/useCheckout.js
+// MODIFICATION BASED ON: /home/daniel/Downloads/zendry-checkout/composables/useCheckout.js
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { buscarCep } from '~/services/cepService'
 import { userMe } from '~/services/userService'
-
-// novo serviço único para o passo 4
 import { fetchPayment, createPayment } from '@/services/paymentApi'
+import { usePaymentStore } from '@/stores/paymentStore'
 
 export function useCheckout () {
   const { $ws } = useNuxtApp()
+  const paymentStore = usePaymentStore()
 
-  // ====== WIZARD (mantido) ===================================================
+  // ====== WIZARD =============================================================
   const currentStep = ref(0)
   const step1Valid = ref(false)
   const step2Valid = ref(false)
@@ -30,7 +30,7 @@ export function useCheckout () {
     if (Number.isInteger(n) && n >= 0 && n <= 2) currentStep.value = n
   }
 
-  // ====== FORM (mantido) =====================================================
+  // ====== FORM ===============================================================
   const userData = userMe() || {}
   const formData = reactive({
     name: userData.name || '',
@@ -61,45 +61,39 @@ export function useCheckout () {
           formData.address.city = dados.city || ''
           formData.address.state = dados.state || ''
         }
-      } catch {
-        // silencioso
-      }
+      } catch { /* silent */ }
     }
   })
 
-  // ====== ORQUESTRAÇÃO DO PAGAMENTO (novo) ===================================
-  // Estado principal vindo do back (id, amount, discount, total, etc.)
-  const payment = ref(null)
-
-  // método escolhido na UI ('card' | 'pix' | 'boleto')
+  // ====== ORQUESTRAÇÃO DO PAGAMENTO =========================================
+  const payment = ref(null)   // compat com seus componentes
   const method = ref(null)
-
-  // status do fluxo
-  const status = ref('idle') // idle | processing | approved | failed | expired | canceled
+  const status = ref('idle')
   const processing = ref(false)
-
-  // dados extras enviados/recebidos do back para a tela
-  // ex: { qrcode, expiresAt, boletoUrl, authorizationId, ... }
   const serverData = reactive({})
 
-  // Busca pagamento no back (DESCONTO vem do back)
   async function loadPayment (id) {
     if (!id) {
       payment.value = null
+      paymentStore.clear()
       return null
     }
     try {
-      // fetchPayment deve devolver o objeto pronto p/ UI (com discount calculado no back)
       const data = await fetchPayment(id)
       payment.value = data || null
+
+      // Store: snapshot inicial
+      paymentStore.setPayment(payment.value)
+      paymentStore.setStatus('idle')
+      paymentStore.mergeServerData({})
       return payment.value
-    } catch (e) {
+    } catch {
       payment.value = null
+      paymentStore.clear()
       return null
     }
   }
 
-  // Mapeia o método da UI para o slug do back
   const mapMethod = (m) => {
     if (m === 'card') return 'credit_card'
     if (m === 'pix') return 'pix'
@@ -108,10 +102,9 @@ export function useCheckout () {
   }
 
   /**
-   * Inicia o pagamento no back.
-   * @param {string} id        - paymentId
-   * @param {'card'|'pix'|'boleto'} mthdUI - método da UI
-   * @param {object} payload   - dados do comprador + método (ex.: token do cartão, etc.)
+   * Inicia o pagamento no back e PREENCHE A STORE.
+   * Também emite via WS um evento código 200 (processing) e,
+   * após um delay, um evento approved com os dados da compra.
    */
   async function start (id, mthdUI, payload = {}) {
     if (!id) return
@@ -119,52 +112,92 @@ export function useCheckout () {
     processing.value = true
     status.value = 'processing'
 
+    // Store: marca início
+    paymentStore.setMethod(mthdUI)
+    paymentStore.setStatus('processing')
+
     try {
-      // cria/inicia no back — back retorna dados para renderização:
-      //   - credit_card: { authorizationId, ... }
-      //   - pix: { qrcode, expiresAt, ... }
-      //   - boleto: { boletoUrl, linhaDigitavel, expiresAt, ... }
       const res = await createPayment({
         id,
         method: mapMethod(mthdUI),
         payload,
+        buyer: {
+          id: userData?.id,
+          name: formData.name,
+          email: formData.email,
+        },
       })
 
-      // mantém o serverData sempre sincronizado
+      // server data local
       Object.keys(serverData).forEach(k => delete serverData[k])
       Object.assign(serverData, res || {})
+
+      // Store: dados complementares retornados
+      paymentStore.mergeServerData(res || {})
+
+      // === WebSocket (PROCESSING/200) ===
+      const processingEvent = {
+        id,
+        code: 200,
+        status: 'processing',
+        method: mapMethod(mthdUI),
+        payment: payment.value,
+        serverData: { ...res },
+      }
+      paymentStore.setLastEvent(processingEvent)
+      $ws?.emit?.('payment:status', processingEvent)
+
+      // === Delay fake e APPROVED/200 ===
+      setTimeout(() => {
+        const approvedEvent = {
+          id,
+          code: 200,
+          status: 'approved',
+          method: mapMethod(mthdUI),
+          payment: payment.value,
+          serverData: { ...res, approvedAt: new Date().toISOString() },
+        }
+        paymentStore.setLastEvent(approvedEvent)
+        $ws?.emit?.('payment:status', approvedEvent)
+      }, 10000) // ajuste o delay que preferir
     } catch (e) {
       status.value = 'failed'
       processing.value = false
+      paymentStore.setStatus('failed')
+
+      const failedEvent = {
+        id,
+        code: 500,
+        status: 'failed',
+        error: e?.message || 'createPayment failed',
+      }
+      paymentStore.setLastEvent(failedEvent)
+      $ws?.emit?.('payment:status', failedEvent)
     }
   }
 
-  // Handler de eventos do “websocket” fake/real
-  // Esperado msg: { id, status, ...extras }
+  // === Handler do WebSocket: mantém composable E store sincronizados =========
   function onStatus (msg) {
-    // garante que é do mesmo pagamento
     if (!payment.value || msg?.id !== payment.value.id) return
 
     status.value = msg.status || status.value
+    paymentStore.setStatus(status.value)
 
-    // atualiza quaisquer dados adicionais que venham do back (qr atualizado, auth id, etc.)
     if (msg && typeof msg === 'object') {
-      Object.assign(serverData, msg)
+      Object.assign(serverData, msg.serverData || {})
+      paymentStore.mergeServerData(msg.serverData || {})
+      paymentStore.setLastEvent(msg)
     }
 
-    if (msg.status === 'approved' || msg.status === 'failed' || msg.status === 'expired' || msg.status === 'canceled') {
+    if (['approved', 'failed', 'expired', 'canceled'].includes(status.value)) {
       processing.value = false
-      // quando aprovado, o wizard pode ir para a confirmação
-      if (msg.status === 'approved') setStep(2)
+      if (status.value === 'approved') setStep(2)
     }
   }
 
   onMounted(() => {
-    // ouça os eventos de status
-    // canal sugerido no passo: 'payment:status'
     $ws?.on?.('payment:status', onStatus)
   })
-
   onBeforeUnmount(() => {
     $ws?.off?.('payment:status', onStatus)
   })
@@ -172,8 +205,7 @@ export function useCheckout () {
   return {
     // wizard
     currentStep, steps, isCurrentStepValid,
-    step1Valid, step2Valid,
-    next, prev, setStep,
+    step1Valid, step2Valid, next, prev, setStep,
 
     // form
     formData,

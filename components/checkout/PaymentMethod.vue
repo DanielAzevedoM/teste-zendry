@@ -1,184 +1,160 @@
+// MODIFICATION BASED ON: /home/daniel/Downloads/zendry-checkout/components/checkout/PaymentMethod.vue
 <script setup>
-import { usePayment } from '@/composables/usePayment'
-import { luhnValid, onlyDigits } from '@/utils/cardBrand'
-import { useCardBrand } from '@/composables/useCardBrand'
+import { ref, computed, watch } from 'vue'
+
+const props = defineProps({
+  couponCode: { type: String, default: '' },
+})
 
 const emit = defineEmits(['valid'])
 
-const {
-  method,        
-  card, pix, boleto,
-  rules,
+// ------------------------------------------------------------------
+// UI state
+// ------------------------------------------------------------------
+const method = ref(null) // 'card' | 'pix' | 'boleto'
+
+// Campos de cartão (exemplo enxuto)
+const card = ref({
+  holderName: '',
+  number: '',
+  expiry: '',
+  cvv: '',
+})
+
+// PIX não precisa de payload além do método
+// Boleto opcional
+const boleto = ref({
+  email: '',
+})
+
+// ------------------------------------------------------------------
+// Validação simples (apenas existência do essencial por método)
+// ------------------------------------------------------------------
+const isCardValid = computed(() => {
+  if (method.value !== 'card') return false
+  const c = card.value
+  return !!(c.holderName && c.number && c.expiry && c.cvv)
+})
+
+const isPixValid = computed(() => method.value === 'pix') // sem campos extras
+
+const isBoletoValid = computed(() => {
+  if (method.value !== 'boleto') return false
+  return !!boleto.value.email
+})
+
+const isValid = computed(() => {
+  if (method.value === 'card') return isCardValid.value
+  if (method.value === 'pix') return isPixValid.value
+  if (method.value === 'boleto') return isBoletoValid.value
+  return false
+})
+
+// emite pro pai sempre que mudar
+watch([method, card, boleto], () => emit('valid', isValid.value), { deep: true, immediate: true })
+
+// ------------------------------------------------------------------
+// Payload por método (o back do seu flow decide o formato final)
+// ------------------------------------------------------------------
+function getPayload () {
+  if (method.value === 'card') {
+    const { holderName, number, expiry, cvv } = card.value
+    return {
+      method: 'card',
+      card: { holderName, number, expiry, cvv },
+    }
+  }
+  if (method.value === 'pix') {
+    return { method: 'pix' }
+  }
+  if (method.value === 'boleto') {
+    const { email } = boleto.value
+    return { method: 'boleto', boleto: { email } }
+  }
+  return null
+}
+
+// ------------------------------------------------------------------
+// Chamado pelo pai antes de concluir; pode rodar validações extras
+// ------------------------------------------------------------------
+async function concluirPagamento () {
+  emit('valid', isValid.value)
+  // se quiser, você pode exibir mensagens aqui antes de retornar false
+  return isValid.value
+}
+
+// expõe para o pai
+defineExpose({
+  concluirPagamento,
   isValid,
-  pay,
-} = usePayment()
-
-watch(isValid, v => emit('valid', v))
-
-// bandeira baseada no número digitado
-const { getBrand, brandIcon } = useCardBrand()
-const brand = computed(() => getBrand(card.number))
-
-// expõe pay() pro pai
-defineExpose({ pay })
+  method,
+  getPayload,
+})
 </script>
 
 <template>
-  <div class="space-y-4">
-    <v-row>
-      <v-col cols="4" class="px-2">
-        <VCard
-          class="pa-3 payment-card"
-          :class="{ selected: method === 'card' }"
-          @click="method='card'"
-        >
-          <div class="font-weight-medium">Cartão de crédito</div>
-          <small>Visa, MasterCard, Hipercard…</small>
-        </VCard>
-      </v-col>
+  <div>
+    <h3 class="text-h6 mb-4">Escolha o método de pagamento</h3>
 
-      <v-col cols="4" class="px-2">
-        <VCard
-          class="pa-3 payment-card"
-          :class="{ selected: method === 'pix' }"
-          @click="method='pix'"
-        >
-          <div class="font-weight-medium">Pix</div>
-          <small>Pagamento instantâneo</small>
-        </VCard>
-      </v-col>
+    <v-btn-toggle v-model="method" mandatory class="mb-6">
+      <v-btn value="card">Cartão</v-btn>
+      <v-btn value="pix">PIX</v-btn>
+      <v-btn value="boleto">Boleto</v-btn>
+    </v-btn-toggle>
 
-      <v-col cols="4" class="px-2">
-        <VCard
-          class="pa-3 payment-card"
-          :class="{ selected: method === 'boleto' }"
-          @click="method='boleto'"
-        >
-          <div class="font-weight-medium">Boleto</div>
-          <small>Compensação em 1–3 dias úteis</small>
-        </VCard>
-      </v-col>
-    </v-row>
-
-    <!-- CARTÃO -->
-    <VForm v-if="method==='card'" v-model="card._valid" validate-on="input lazy" class="mt-5">
-      <VTextField
-        v-model="card.holder"
+    <!-- Cartão -->
+    <div v-if="method === 'card'">
+      <v-text-field
+        v-model="card.holderName"
         label="Nome impresso no cartão"
         variant="outlined"
-        :rules="[rules.required('Nome no cartão'), rules.minLen('Nome no cartão', 5)]"
+        class="mb-3"
       />
-
-      <VTextField
-        class="mt-2"
+      <v-text-field
         v-model="card.number"
         label="Número do cartão"
         variant="outlined"
-        inputmode="numeric"
-        :maxlength="19"
-        :rules="[
-          rules.required('Número do cartão'),
-          v => luhnValid(onlyDigits(v)) || 'Cartão inválido'
-        ]"
-        hint="Aceitamos Visa, MasterCard, Amex, Elo, Hipercard…"
-        persistent-hint
-      >
-        <!-- Ícone da bandeira no input -->
-        <template #prepend-inner>
-          <VIcon v-if="brand" :icon="brandIcon(brand)" />
-        </template>
-      </VTextField>
-
-      <v-row class="mt-1">
-        <v-col>
-          <VTextField
-            v-model="card.exp"
-            v-mask="'expiry'"
-            label="Validade (MM/AA)"
-            variant="outlined"
-            placeholder="MM/AA"
-            maxlength="5"
-            :rules="[rules.required('Validade'), rules.expDate]"
-          />
-        </v-col>
-        <v-col>
-          <VTextField
-            v-model="card.cvv"
-            label="CVV"
-            variant="outlined"
-            inputmode="numeric"
-            :maxlength="4"
-            :rules="[rules.required('CVV'), rules.onlyDigits('CVV'), rules.lenBetween('CVV', 3, 4)]"
-          />
-        </v-col>
-      </v-row>
-    </VForm>
+        class="mb-3"
+        v-mask="'card'"
+      />
+      <div class="d-flex" style="gap:12px">
+        <v-text-field
+          v-model="card.expiry"
+          label="Validade (MM/AA)"
+          variant="outlined"
+          v-mask="'expiry'"
+          class="flex-grow-1"
+        />
+        <v-text-field
+          v-model="card.cvv"
+          label="CVV"
+          variant="outlined"
+          class="flex-grow-1"
+        />
+      </div>
+    </div>
 
     <!-- PIX -->
-    <VForm v-if="method==='pix'" v-model="pix._valid" validate-on="input lazy" class="mt-5">
-      <VTextField
-        v-model="pix.key"
-        label="Chave Pix (CPF/CNPJ, e-mail, telefone ou aleatória)"
-        variant="outlined"
-        :rules="[rules.required('Chave Pix')]"
-      />
-      <VTextField
-        class="mt-2"
-        v-model="pix.payerName"
-        label="Nome do pagador"
-        variant="outlined"
-        :rules="[rules.required('Nome do pagador'), rules.minLen('Nome do pagador', 5)]"
-      />
-    </VForm>
+    <div v-else-if="method === 'pix'">
+      <v-alert variant="tonal">
+        Pagamento instantâneo. Após confirmar, mostraremos o QR Code e aguardaremos a confirmação automática.
+      </v-alert>
+    </div>
 
-    <!-- BOLETO -->
-    <VForm v-if="method==='boleto'" v-model="boleto._valid" validate-on="input lazy" class="mt-5">
-      <VTextField
-        v-model="boleto.payerName"
-        label="Nome do pagador"
-        variant="outlined"
-        :rules="[rules.required('Nome do pagador'), rules.minLen('Nome do pagador', 5)]"
-      />
-      <VTextField
-        class="mt-2"
-        v-model="boleto.cpf"
-        label="CPF"
-        variant="outlined"
-        inputmode="numeric"
-        :maxlength="14"
-        :rules="[
-          rules.required('CPF'),
-          rules.onlyDigits('CPF'),
-          rules.len('CPF', 11),
-          rules.cpf
-        ]"
-      />
-      <VTextField
-        class="mt-2"
+    <!-- Boleto -->
+    <div v-else-if="method === 'boleto'">
+      <v-text-field
         v-model="boleto.email"
         label="E-mail para envio do boleto"
         variant="outlined"
-        :rules="[rules.required('E-mail'), rules.email]"
+        class="mb-3"
       />
-    </VForm>
+      <v-alert variant="tonal">
+        O boleto será gerado e você poderá abrir/baixar antes da compensação.
+      </v-alert>
+    </div>
+
+
+
   </div>
 </template>
-
-<style scoped>
-.payment-card {
-  min-width: 0;
-  cursor: pointer;
-  background-color: #d8d8e6 !important;
-  color: rgb(var(--v-theme-on-surface)) !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
-  transition: background-color .2s, border-color .2s, color .2s;
-}
-.payment-card:hover:not(.selected) {
-  background-color: #c9c9d8 !important;
-}
-.payment-card.selected {
-  background-color: rgb(var(--v-theme-primary)) !important;
-  color: rgb(var(--v-theme-on-primary)) !important;
-  border-color: rgb(var(--v-theme-primary)) !important;
-}
-</style>

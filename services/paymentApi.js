@@ -1,13 +1,13 @@
-// services/paymentApi.js
-let _ws // será injetado via plugin pra simular websocket
+import { createTransaction } from '@/services/transactionService'
 
-export function setWs(ws) { _ws = ws } // chamada no plugin
+let _ws
 
-// Busca dados do pagamento já com desconto calculado no “servidor”
-export async function fetchPayment(id) {
-  // simula back: valor e desconto calculado lá
+export function setWs (ws) { _ws = ws }
+
+// Busca de valores base da cobrança (mantém comportamento simulado atual)
+export async function fetchPayment (id) {
   await new Promise(r => setTimeout(r, 300))
-  // devolve amount bruto, discount e total
+
   return {
     id,
     amount: 12990,
@@ -17,44 +17,63 @@ export async function fetchPayment(id) {
   }
 }
 
-// Inicia o pagamento no “servidor”
-export async function createPayment({ id, method, payload }) {
-  await new Promise(r => setTimeout(r, 400))
-  // avisa pelo “websocket” que está processando
-  _ws?.emit('payment:status', { id, status: 'processing', method })
 
-  // Simulação por método:
+export async function createPayment ({ id, method, payload }) {
+  // Simula latência da criação
+  await new Promise(r => setTimeout(r, 400))
+
+  // 1) Salva no "fake api" (transactions) com todos os dados que a tela pode querer exibir
+  const tx = await createTransaction({
+    orderId: id,
+    method,
+    ...payload, // esperado conter: amount, discount, buyer { name, id }, e detalhes do método
+  })
+
+  // 2) Emite "processing" imediatamente, com os dados relevantes para a UI mostrar "aguardando confirmação"
+  _ws?.emit('payment:status', {
+    id,                     // mantém o mesmo id do fluxo (pedido)
+    status: 'processing',
+    method,
+    transactionId: tx.id,   // id interno do "fake api"
+    createdAt: tx.createdAt,
+    details: {
+      orderId: tx.orderId,
+      amount: tx.amount,
+      discount: tx.discount,
+      buyer: tx.buyer,      // { name, id }
+      methodDetails: tx.details || null, // dados específicos do método (ex: cartão mascarado, pix, boleto)
+    },
+  })
+
+  // 3) Emissão de "approved" após o delay do provedor (alinhado com transactionService)
+  setTimeout(() => {
+    _ws?.emit('payment:status', {
+      id,
+      status: 'approved',
+      method,
+      transactionId: tx.id,
+      approvedAt: new Date().toISOString(),
+    })
+  }, 3200) // ligeiramente acima do 3000ms do transactionService para garantir ordem dos eventos
+
+  // 4) Retorno mantido por método, inclusive dados extras para PIX (se já for usado na tela)
   if (method === 'credit_card') {
-    // depois de um delay, confirmar
-    setTimeout(() => {
-      _ws?.emit('payment:status', {
-        id, status: 'approved', method,
-        authCode: String(Math.floor(Math.random()*900000)+100000),
-      })
-    }, 2500)
+    // Para cartão, apenas confirma depois — nada especial para retornar aqui
     return { ok: true }
   }
 
   if (method === 'pix') {
-    // gera um QR base64 (mock) + expiração 3 min
-    const expiresAt = Date.now() + 3*60*1000
-    const qrBase64 = 'data:image/png;base64,iVBORw0KGgoAAA...' // mock
-    // simula confirmação por “websocket” em ~5s
-    setTimeout(() => {
-      _ws?.emit('payment:status', { id, status: 'approved', method, paidAt: Date.now() })
-    }, 5000)
+    // Mantém a simulação atual com QR e expiração
+    const expiresAt = Date.now() + 3 * 60 * 1000
+    const qrBase64 = 'data:image/png;base64,iVBORw0KGgoAAA.' // QR fictício
     return { ok: true, qrBase64, expiresAt }
   }
 
   if (method === 'boleto') {
-    const expiresAt = Date.now() + 3*60*1000
-    const boletoPdf = 'data:application/pdf;base64,JVBERi0xLjQK...' // mock
-    const linhaDigitavel = '34191.79001 01043.510047 91020.150008 1 23450000010000'
-    setTimeout(() => {
-      _ws?.emit('payment:status', { id, status: 'approved', method, paidAt: Date.now() })
-    }, 7000)
-    return { ok: true, boletoPdf, linhaDigitavel, expiresAt }
+    // Para boleto, podemos retornar dados mínimos (linha digitável poderia estar no payload)
+    return { ok: true }
   }
 
-  return { ok: false }
+  // Fallback genérico
+  return { ok: true }
 }
