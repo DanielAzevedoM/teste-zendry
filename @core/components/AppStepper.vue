@@ -204,6 +204,7 @@ watchEffect(() => {
 </template>
 
 <style lang="scss">
+
 @use "@core/scss/template/mixins" as templateMixins;
 
 .app-stepper {
@@ -356,5 +357,6 @@ watchEffect(() => {
       justify-content: end;
     }
   }
+  
 }
 </style>

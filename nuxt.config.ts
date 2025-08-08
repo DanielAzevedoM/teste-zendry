@@ -23,6 +23,7 @@ export default defineNuxtConfig({
     plugins: [vuetify()]
   },
   modules: [
+    '@vueuse/nuxt',
     '@pinia/nuxt'
   ]
 })

@@ -1,5 +1,4 @@
 <script setup>
-import AppStepper from '@core/components/AppStepper.vue'
 import AppTextField from '@core/components/app-form-elements/AppTextField.vue'
 import AppSelect from '@core/components/app-form-elements/AppSelect.vue'
 

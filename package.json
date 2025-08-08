@@ -19,6 +19,7 @@
     "vuetify": "3.8.9"
   },
   "devDependencies": {
+    "@vueuse/nuxt": "^13.6.0",
     "sass-embedded": "^1.90.0",
     "vite-plugin-vuetify": "^2.1.2"
   }

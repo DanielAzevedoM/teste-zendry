@@ -3,13 +3,13 @@ export const users = [
     id: '2f1e7b6a-7ec6-4f56-9480-3a3e9e7e6f8e',
     name: 'Daniel Azevêdo',
     email: 'daniel@example.com',
-    cpf: '123.456.789-00',
+    cpf: '05782615532',
     phone: '82999999999',
     address: {
       city: 'Maceió',
       state: 'AL',
       country: 'BR',
-      zip: '57000-000',
+      zip: '57000000',
       neighborhood: 'Ponta Verde',
       complement: 'Apt 301',
       street: 'Av. Álvaro Otacílio',
@@ -20,13 +20,13 @@ export const users = [
     id: '0a8f3f92-2c97-40ad-a69e-93a3c387dfd0',
     name: 'Joana Silva',
     email: 'joana@example.com',
-    cpf: '987.654.321-00',
+    cpf: '05782615532',
     phone: '21988888888',
     address: {
       city: 'Rio de Janeiro',
       state: 'RJ',
       country: 'BR',
-      zip: '20000-000',
+      zip: '20000000',
       neighborhood: 'Copacabana',
       complement: 'Casa 2',
       street: 'Rua Barata Ribeiro',
@@ -37,13 +37,13 @@ export const users = [
     id: 'd7e2cf7f-06f1-4370-894f-858b517e7741',
     name: 'Carlos Souza',
     email: 'carlos@example.com',
-    cpf: '111.222.333-44',
+    cpf: '05782615532',
     phone: '1133333333',
     address: {
       city: 'São Paulo',
       state: 'SP',
       country: 'BR',
-      zip: '01000-000',
+      zip: '01000000',
       neighborhood: 'Sé',
       complement: '',
       street: 'Praça da Sé',
@@ -56,7 +56,7 @@ export const paymentsMock = [
   {
     id: "pay_001",
     type: "", // pix | cartao | boleto
-    amount: 150.00, // valor original
+    amount: 150.10, // valor original
     discount:0,
     currency: "BRL",
     expiresAt: "2025-08-07T20:30:00Z",

@@ -1,17 +1,21 @@
 <script setup>
 import { Country, State } from 'country-state-city'
 import { useAuthStore } from '~/stores/authStore'
+import { nextTick, onMounted } from 'vue'
 
 const props = defineProps({
-  formData: { type: Object, required: true }
+  formData: { type: Object, required: true },
 })
-const emit = defineEmits(['update:valid'])
+const emit = defineEmits(['valid-step1', 'valid-step2'])
 
 const authStore = useAuthStore()
 const formData = props.formData
 
-// Helpers
+// helpers
 const onlyDigits = v => (v || '').toString().replace(/\D/g, '')
+const digitsMax = (v, max) => onlyDigits(String(v ?? '')).slice(0, max)
+const countLetters = v => (String(v || '').match(/[A-Za-zÀ-ÿ]/g) || []).length
+
 function isValidCPF(cpf) {
   const s = onlyDigits(cpf)
   if (s.length !== 11) return false
@@ -27,7 +31,7 @@ function isValidCPF(cpf) {
   return d1 === parseInt(s[9]) && d2 === parseInt(s[10])
 }
 
-// Rules com mensagens
+// regras
 const rules = {
   required: label => v => (v ?? '').toString().trim() !== '' || `${label} é obrigatório`,
   email: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v)) || 'E-mail inválido',
@@ -38,35 +42,50 @@ const rules = {
     return (d >= min && d <= max) || `${label} deve ter entre ${min} e ${max} dígitos`
   },
   cpf: v => (onlyDigits(v).length === 11 && isValidCPF(v)) || 'CPF inválido',
+  minLetters: n => v => countLetters(v) >= n || `Nome precisa de pelo menos ${n} letras`,
 }
 
-// Países/Estados
+
+// países/estados
 const countryOptions = Country.getAllCountries().map(c => ({ name: c.name, code: c.isoCode }))
 const stateOptions = computed(() => {
   const cc = formData.address?.country
   if (!cc) return []
   return State.getStatesOfCountry(cc).map(s => ({ name: s.name, code: s.isoCode }))
 })
-
 watch(() => formData.address.country, () => {
   formData.address.state = ''
   formData.address.city = ''
 })
 
-// Validity up para o pai
+// refs de forms + válido
 const formRef1 = ref(null)
-const formRef2 = ref(null)  
+const formRef2 = ref(null)
 const isForm1Valid = ref(false)
 const isForm2Valid = ref(false)
 
-watch([isForm1Valid, isForm2Valid], () => {
-  emit('update:valid', isForm1Valid.value && isForm2Valid.value)
+// SEMPRE que mudar, emite pro pai
+watch(isForm1Valid, v => emit('valid-step1', !!v))
+watch(isForm2Valid, v => emit('valid-step2', !!v))
+
+// garante que o estado inicial não fique “vermelho para sempre”
+onMounted(async () => {
+  await nextTick()
+  await formRef1.value?.validate()   // força validar
+  emit('valid-step1', !!isForm1Valid.value)
+  await formRef2.value?.validate()
+  emit('valid-step2', !!isForm2Valid.value)
 })
 </script>
 
 <template>
   <!-- FORM 1 -->
-  <VForm class="v-form-style mt-5" ref="formRef1" v-model="isForm1Valid" validate-on="input lazy">
+  <VForm
+    ref="formRef1"
+    v-model="isForm1Valid"
+    validate-on="input"    
+    class="v-form-style mt-5"
+  >
     <v-row>
       <v-col cols="8">
         <p class="pt-5 pb-5">Informações da conta:</p>
@@ -90,45 +109,52 @@ watch([isForm1Valid, isForm2Valid], () => {
       <v-col>
         <VTextField
           v-model="formData.cpf"
+          v-mask="'cpf'"
           label="CPF"
           variant="outlined"
-          inputmode="numeric"
-          :rules="[
-            rules.required('CPF'),
-            rules.onlyDigits('CPF'),
-            rules.len('CPF', 11),
-            rules.cpf
-          ]"
+          maxlength="14" 
+          :rules="[rules.required('CPF'), rules.onlyDigits('CPF'), rules.len('CPF', 11), rules.cpf]"
         />
       </v-col>
       <v-col>
         <VTextField
-          v-model="formData.phone"
-          label="Número de telefone"
-          variant="outlined"
-          inputmode="numeric"
-          :rules="[
-            rules.required('Telefone'),
-            rules.onlyDigits('Telefone'),
-            rules.lenBetween('Telefone', 10, 11)
-          ]"
-        />
+            v-model="formData.phone"
+            label="Número de telefone"
+            variant="outlined"
+            type="tel"
+            inputmode="numeric"
+            :maxlength="11"
+            @update:modelValue="val => formData.phone = digitsMax(val, 11)"
+            :rules="[
+                rules.required('Telefone'),
+                rules.onlyDigits('Telefone'),
+                rules.lenBetween('Telefone', 10, 11)
+            ]"
+            />
       </v-col>
     </v-row>
 
-    <VTextField
-    class="pt-2"
-      v-model="formData.name"
-      label="Nome completo"
-      variant="outlined"
-      :rules="[rules.required('Nome completo')]"
-    />
+   <VTextField
+  class="pt-2"
+  v-model="formData.name"
+  label="Nome completo"
+  variant="outlined"
+  :rules="[
+    rules.required('Nome completo'),
+    rules.minLetters(10)
+  ]"
+/>
 
     <VCheckbox v-model="formData.checkbox" :label="'Deseja receber notificações por email?'" />
   </VForm>
 
   <!-- FORM 2 -->
-  <VForm class="v-form-style mt-5" ref="formRef2" v-model="isForm2Valid" validate-on="input lazy">
+  <VForm
+    ref="formRef2"
+    v-model="isForm2Valid"
+    validate-on="input"
+    class="v-form-style mt-5"
+  >
     <p class="pt-5 pb-5">Endereço do pagamento:</p>
 
     <v-row>
@@ -163,14 +189,11 @@ watch([isForm1Valid, isForm2Valid], () => {
       <v-col>
         <VTextField
           v-model="formData.address.zip"
+          v-mask="'cep'"
           label="CEP"
           variant="outlined"
-          inputmode="numeric"
-          :rules="[
-            rules.required('CEP'),
-            rules.onlyDigits('CEP'),
-            rules.len('CEP', 8)
-          ]"
+          maxlength="9"   
+          :rules="[rules.required('CEP'), rules.onlyDigits('CEP'), rules.len('CEP', 8)]"
         />
       </v-col>
       <v-col>

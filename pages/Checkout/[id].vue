@@ -1,187 +1,122 @@
 <script setup>
-import AppStepper from '~/@core/components/AppStepper.vue';
-import AccountForm from '~/components/forms/AccountForm.vue';
-import { useRoute } from 'vue-router';
-import { buscarCep } from '~/services/cepService';
-import { userMe } from '~/services/userService';
-import { getPaymentById } from '~/services/paymentService';
-import { cupons } from '~/utils/fakeApi/mock-data';
+import AppStepper from '~/@core/components/AppStepper.vue'
+import AccountForm from '@/components/checkout/AccountForm.vue'
+import OrderSummary from '@/components/checkout/OrderSummary.vue'
+import PaymentMethod from '@/components/checkout/PaymentMethod.vue'
 
-definePageMeta({
-  middleware: 'check-payment-exists', // chama /middleware/check-payment.js
-  layout: 'checkout' // opcional, define layout diferente
-})
+import { useRoute, useRouter } from 'vue-router'
+import { useCheckout } from '@/composables/useCheckout'
+import { useCoupon } from '@/composables/useCoupon'
+
+definePageMeta({ middleware: 'check-payment-exists' })
 
 const route = useRoute()
-const currentStep = ref(0)
-const isCurrentStepValid = ref(true)
-const userData = userMe()
-const paymentData = await getPaymentById(route.params.id)
+const router = useRouter()
 
-const couponCode = ref('')
-const discountValue = ref(paymentData.data.discount) 
+const {
+  currentStep, steps,
+  step1Valid, step2Valid,
+  formData, payment,
+  next, prev, loadPayment,
+  start,                    // << do Passo 4
+} = useCheckout()
 
-const steps = [
-  { title: 'Detalhes da conta', subtitle: 'Conta' },
-  { title: 'Meio de pagamento', subtitle: 'Pagamento' },
-  { title: 'Confirmação do pagamento', subtitle: 'Confirmação' },
-];
+await loadPayment(route.params.id)
 
-const formData = reactive({
-  name: userData ? userData.name : '',
-  email: userData ? userData.email : '',
-  cpf: userData ? userData.cpf : '',
-  phone: userData ? userData.phone : '',
-  address: {
-    city: userData ? userData.address.city : '',
-    state: userData ? userData.address.state : '',
-    country: userData ? userData.address.country : '',
-    zip: userData ? userData.address.zip : '',
-    neighborhood: userData ? userData.address.neighborhood : '',
-    complement: userData ? userData.address.complement : '',
-    street: userData ? userData.address.street : '',
-  },
-  checkbox: userData ? userData.checkbox : false,
-})
+// só o código do cupom no front; desconto vem no payment do back
+const { couponCode } = useCoupon()
 
-watch(couponCode, (newCode) => {
-  const found = cupons.find(c => c.code.toLowerCase() === newCode.toLowerCase())
-  if (found) {
-    discountValue.value = found.discount
-  } else {
-    discountValue.value = 0
-  }
-})
+const paymentRef = ref(null)
 
-watch(() => formData.address.zip, async (novoCep) => {
-  if (novoCep && novoCep.length === 8) {
-    const dados = await buscarCep(novoCep)
-    if (dados) {
-      formData.address.street = dados.street
-      formData.address.neighborhood = dados.neighborhood
-      formData.address.city = dados.city
-      formData.address.state = dados.state
-    }
-  }
-})
+async function concluirPagamento () {
+  // valida step atual de pagamento
+  if (!step2Valid.value) return
 
-watch(currentStep, (newStep) => {
-  if (newStep < 0) {
-    currentStep.value = 0; 
-    isCurrentStepValid.value = true;
-  } else if (newStep > 2) {
-    currentStep.value = 2; 
-    isCurrentStepValid.value = true;
-  }
-});
+  // pega dados do filho
+  const isValid = paymentRef.value?.isValid?.value
+  const method = paymentRef.value?.method?.value
+  const payload = paymentRef.value?.getPayload?.()
 
+  if (!isValid || !method || !payload) return
 
+  // chama o flow (back calcula desconto / retorna dados / dispara websocket)
+  await start(route.params.id, method, { ...payload, couponCode: couponCode.value })
 
+  // vai pra tela de confirmação
+  router.push(`/checkout/${route.params.id}/confirm`)
+}
 </script>
+
 
 <template>
   <v-container fluid class="pa-0">
     <v-row class="ma-0">
-      <v-col cols="12" md="7" class="pa-0" style="background-color: white; height: 100vh">
-        <v-container class="pa-0" style="max-width: 49rem;">
+      <v-col cols="12" md="7" class="pa-0" style="background:#fff;height:100vh">
+        <v-container class="pa-0" style="max-width:49rem">
           <v-container class="px-4">
             <AppStepper
               class="mt-6"
               :items="steps"
               :current-step="currentStep"
-              :is-active-step-valid="isCurrentStepValid"
+              :is-active-step-valid="true"
             />
 
-            <AccountForm v-if="currentStep === 0" :form-data="formData" />
+            <AccountForm
+              v-if="currentStep === 0"
+              :form-data="formData"
+              @valid-step1="val => step1Valid = val"
+              @valid-step2="val => step2Valid = val"
+            />
+
+            <PaymentMethod
+                v-if="currentStep === 1"
+                ref="paymentRef"
+                class="mt-10"
+                :coupon-code="couponCode"
+                @valid="val => step2Valid = val"
+                />
 
             <v-container class="d-flex pa-0">
-              <span
-                v-if="currentStep > 0 && currentStep < 2"
-                class="text-button-style pt-5"
-                @click="currentStep--"
-              >
+              <span v-if="currentStep>0 && currentStep<2" class="text-button-style pt-5" @click="prev">
                 <v-icon size="18" class="mb-1">mdi-chevron-left</v-icon> Voltar
               </span>
-
               <v-spacer />
-
               <v-btn
                 v-if="currentStep < 1"
                 class="mt-5"
                 color="primary"
-                @click="currentStep++"
-                :disabled="!isCurrentStepValid"
+                @click="next"
+                :disabled="!(currentStep===0 ? step1Valid : step2Valid)"
               >
                 Próximo
               </v-btn>
-
               <v-btn
-                v-if="currentStep == 1"
+                v-if="currentStep === 1"
                 class="mt-5"
                 color="primary"
-                @click="currentStep++"
-                :disabled="!isCurrentStepValid"
-              >
+                :disabled="!step2Valid"
+                @click="paymentRef?.concluirPagamento?.()"
+                >
                 Concluir Pagamento
-              </v-btn>
+                </v-btn>
             </v-container>
           </v-container>
         </v-container>
       </v-col>
 
-      <!-- COLUNA DO RESUMO: 12 no mobile, 5 no >= md -->
-      <v-col cols="12" md="5" class="pa-0" style="background: rgb(216, 216, 230); height: 100vh;">
-        <v-container class="px-4 py-6" style="max-width: 24rem;">
-         
-          <VTextField
-            v-model="couponCode"
-            class="pt-5 cupom-input-style"
-            label="Cupom"
-            variant="outlined"
-            />
+      <v-col cols="12" md="5" class="pa-0" style="background:#d8d8e6;height:100vh;">
+        
+        <OrderSummary
+        v-if="payment"
+        :amount="payment.amount"
+        :discount="payment.discount"
+        />
 
-          <v-row class="pt-5">
-            <v-col><p>Valor:</p></v-col>
-            <v-col class="text-right"><p>R$ {{ paymentData.data.amount }}</p></v-col>
-          </v-row>
-
-            <v-row class="px-1 mt-0">
-                <v-col><p>Desconto:</p></v-col>
-                <v-col class="text-right"><p>R$ {{ discountValue }}</p></v-col>
-            </v-row>
-
-          <v-divider class="my-4" />
-
-          <v-row class="px-1">
-            <v-col><p>Valor a pagar:</p></v-col>
-            <v-col class="text-right"><h2>R$ {{ paymentData.data.amount - discountValue }}</h2></v-col>
-          </v-row>
-        </v-container>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-   
 <style scoped>
-
-
-
-.paymentData-container {
-    max-width: 24vw;
-    margin-top: 5vh;
-}
-
-.cupom-input-style{
-
-  border-bottom: 1px solid gray; border-top: 1px solid gray;
-}
-
-.text-button-style {
-    text-transform: none;
-    color: #0066cc;
-    cursor: pointer;
-    font-weight: 500;
-    background-color: transparent;
-}
+.text-button-style{ text-transform:none;color:#06c;cursor:pointer;font-weight:500;background:transparent }
 </style>
