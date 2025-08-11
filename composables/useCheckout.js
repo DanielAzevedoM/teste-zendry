@@ -1,217 +1,201 @@
-// MODIFICATION BASED ON: /home/daniel/Downloads/zendry-checkout/composables/useCheckout.js
+// composables/useCheckout.js
+
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { buscarCep } from '~/services/cepService'
 import { userMe } from '~/services/userService'
-import { fetchPayment, createPayment } from '@/services/paymentApi'
+import { createPayment } from '@/services/paymentApi'
 import { usePaymentStore } from '@/stores/paymentStore'
+import { useGeneratorStore } from '~/stores/generatorStore';
+import { getPaymentById } from '~/services/paymentService'; // LINHA ADICIONADA
 
 export function useCheckout () {
-  const { $ws } = useNuxtApp()
-  const paymentStore = usePaymentStore()
+ const { $ws } = useNuxtApp()
+ const paymentStore = usePaymentStore()
+ const generatorStore = useGeneratorStore();
 
-  // ====== WIZARD =============================================================
-  const currentStep = ref(0)
-  const step1Valid = ref(false)
-  const step2Valid = ref(false)
+ 
+ const currentStep = ref(0)
+ const stepAccountValid = ref(false)
+ const stepAddressValid = ref(false)
+ const stepPaymentValid = ref(false)
 
-  const isCurrentStepValid = computed(() =>
-    currentStep.value === 0 ? step1Valid.value : step2Valid.value
-  )
-
-  const steps = [
+ const steps = computed(() => {
+  const baseSteps = [
     { title: 'Detalhes da conta', subtitle: 'Conta' },
     { title: 'Meio de pagamento', subtitle: 'Pagamento' },
     { title: 'Confirmação do pagamento', subtitle: 'Confirmação' },
-  ]
-
-  function next () { if (currentStep.value < 2) currentStep.value++ }
-  function prev () { if (currentStep.value > 0) currentStep.value-- }
-  function setStep (n) {
-    if (Number.isInteger(n) && n >= 0 && n <= 2) currentStep.value = n
+  ];
+  if (generatorStore.showAddressFields) {
+    baseSteps.splice(1, 0, { title: 'Endereço', subtitle: 'Entrega' });
   }
+  return baseSteps;
+ });
 
-  // ====== FORM ===============================================================
-  const userData = userMe() || {}
-  const formData = reactive({
-    name: userData.name || '',
-    email: userData.email || '',
-    cpf: userData.cpf || '',
-    phone: userData.phone || '',
-    address: {
-      city: userData.address?.city || '',
-      state: userData.address?.state || '',
-      country: userData.address?.country || '',
-      zip: userData.address?.zip || '',
-      neighborhood: userData.address?.neighborhood || '',
-      complement: userData.address?.complement || '',
-      street: userData.address?.street || '',
-    },
-    checkbox: !!userData.checkbox,
-  })
+ const isCurrentStepValid = computed(() => {
+    // Etapa 0: Conta
+    if (currentStep.value === 0) return stepAccountValid.value;
 
-  // Auto-preenche endereço pelo CEP
-  watch(() => formData.address.zip, async (novoCep) => {
-    const cep = (novoCep || '').replace(/\D/g, '')
-    if (cep.length === 8) {
-      try {
-        const dados = await buscarCep(cep)
-        if (dados) {
-          formData.address.street = dados.street || ''
-          formData.address.neighborhood = dados.neighborhood || ''
-          formData.address.city = dados.city || ''
-          formData.address.state = dados.state || ''
-        }
-      } catch { /* silent */ }
+    if (generatorStore.showAddressFields) {
+      // Com endereço: Etapa 1 é Endereço, Etapa 2 é Pagamento
+      if (currentStep.value === 1) return stepAddressValid.value;
+      if (currentStep.value === 2) return stepPaymentValid.value;
+    } else {
+      // Sem endereço: Etapa 1 é Pagamento
+      if (currentStep.value === 1) return stepPaymentValid.value;
     }
-  })
+    // A última etapa (confirmação) não precisa de validação de botão
+    return true; 
+  });
 
-  // ====== ORQUESTRAÇÃO DO PAGAMENTO =========================================
-  const payment = ref(null)   // compat com seus componentes
-  const method = ref(null)
-  const status = ref('idle')
-  const processing = ref(false)
-  const serverData = reactive({})
 
-  async function loadPayment (id) {
-    if (!id) {
-      payment.value = null
-      paymentStore.clear()
-      return null
-    }
+ function next () { if (currentStep.value < steps.value.length -1) currentStep.value++ }
+ function prev () { if (currentStep.value > 0) currentStep.value-- }
+ function setStep (n) {
+ if (Number.isInteger(n) && n >= 0 && n < steps.value.length) currentStep.value = n
+ }
+ 
+ const userData = userMe() || {}
+ const formData = reactive({
+ name: userData.name || '',
+ email: userData.email || '',
+ cpf: userData.cpf || '',
+ phone: userData.phone || '',
+ address: {
+ city: userData.address?.city || '',
+ state: userData.address?.state || '',
+ country: userData.address?.country || '',
+ zip: userData.address?.zip || '',
+ neighborhood: userData.address?.neighborhood || '',
+ complement: userData.address?.complement || '',
+ street: userData.address?.street || '',
+ },
+ checkbox: !!userData.checkbox,
+ })
+ 
+ const payment = ref(null)
+ const method = ref('card')
+ const status = ref('idle')
+ const processing = ref(false)
+ const serverData = reactive({})
+
+ async function loadPayment (id) {
     try {
-      const data = await fetchPayment(id)
-      payment.value = data || null
-
-      // Store: snapshot inicial
-      paymentStore.setPayment(payment.value)
-      paymentStore.setStatus('idle')
-      paymentStore.mergeServerData({})
-      return payment.value
-    } catch {
-      payment.value = null
-      paymentStore.clear()
-      return null
-    }
-  }
-
-  const mapMethod = (m) => {
-    if (m === 'card') return 'credit_card'
-    if (m === 'pix') return 'pix'
-    if (m === 'boleto') return 'boleto'
-    return m
-  }
-
-  /**
-   * Inicia o pagamento no back e PREENCHE A STORE.
-   * Também emite via WS um evento código 200 (processing) e,
-   * após um delay, um evento approved com os dados da compra.
-   */
-  async function start (id, mthdUI, payload = {}) {
-    if (!id) return
-    method.value = mthdUI
-    processing.value = true
-    status.value = 'processing'
-
-    // Store: marca início
-    paymentStore.setMethod(mthdUI)
-    paymentStore.setStatus('processing')
-
-    try {
-      const res = await createPayment({
-        id,
-        method: mapMethod(mthdUI),
-        payload,
-        buyer: {
-          id: userData?.id,
-          name: formData.name,
-          email: formData.email,
-        },
-      })
-
-      // server data local
-      Object.keys(serverData).forEach(k => delete serverData[k])
-      Object.assign(serverData, res || {})
-
-      // Store: dados complementares retornados
-      paymentStore.mergeServerData(res || {})
-
-      // === WebSocket (PROCESSING/200) ===
-      const processingEvent = {
-        id,
-        code: 200,
-        status: 'processing',
-        method: mapMethod(mthdUI),
-        payment: payment.value,
-        serverData: { ...res },
-      }
-      paymentStore.setLastEvent(processingEvent)
-      $ws?.emit?.('payment:status', processingEvent)
-
-      // === Delay fake e APPROVED/200 ===
-      setTimeout(() => {
-        const approvedEvent = {
-          id,
-          code: 200,
-          status: 'approved',
-          method: mapMethod(mthdUI),
-          payment: payment.value,
-          serverData: { ...res, approvedAt: new Date().toISOString() },
-        }
-        paymentStore.setLastEvent(approvedEvent)
-        $ws?.emit?.('payment:status', approvedEvent)
-      }, 10000) // ajuste o delay que preferir
+        const p = await getPaymentById(id) // Agora esta função será encontrada
+        payment.value = p
+        paymentStore.setPayment(p)
     } catch (e) {
-      status.value = 'failed'
-      processing.value = false
-      paymentStore.setStatus('failed')
-
-      const failedEvent = {
-        id,
-        code: 500,
-        status: 'failed',
-        error: e?.message || 'createPayment failed',
-      }
-      paymentStore.setLastEvent(failedEvent)
-      $ws?.emit?.('payment:status', failedEvent)
+        console.error('Erro ao carregar pagamento:', e)
     }
-  }
+ }
 
-  // === Handler do WebSocket: mantém composable E store sincronizados =========
-  function onStatus (msg) {
+ const mapMethod = m => ({ card: 'credit_card' }[m] || m)
+
+ async function start (id, mthdUI, payload = {}) {
+ if (!id) return
+ method.value = mthdUI
+ processing.value = true
+ status.value = 'processing'
+
+ 
+ paymentStore.setMethod(mthdUI)
+ paymentStore.setStatus('processing')
+
+ try {
+ const res = await createPayment({
+ id,
+ method: mapMethod(mthdUI),
+ payload,
+ buyer: {
+ id: userData?.id,
+ name: formData.name,
+ email: formData.email,
+ },
+ })
+
+ 
+ Object.keys(serverData).forEach(k => delete serverData[k])
+ Object.assign(serverData, res || {})
+
+ 
+ paymentStore.mergeServerData(res || {})
+
+ 
+ const processingEvent = {
+ id,
+ code: 200,
+ status: 'processing',
+ method: mapMethod(mthdUI),
+ payment: payment.value,
+ serverData: { ...res },
+ }
+ paymentStore.setLastEvent(processingEvent)
+ $ws?.emit?.('payment:status', processingEvent)
+
+ 
+ setTimeout(() => {
+ const approvedEvent = {
+ id,
+ code: 200,
+ status: 'approved',
+ method: mapMethod(mthdUI),
+ payment: payment.value,
+ serverData: { ...res, approvedAt: new Date().toISOString() },
+ }
+ paymentStore.setLastEvent(approvedEvent)
+ $ws?.emit?.('payment:status', approvedEvent)
+ }, 10000) 
+ } catch (e) {
+ status.value = 'failed'
+ processing.value = false
+ paymentStore.setStatus('failed')
+
+ const failedEvent = {
+ id,
+ code: 500,
+ status: 'failed',
+ error: e?.message || 'createPayment failed',
+ }
+ paymentStore.setLastEvent(failedEvent)
+ $ws?.emit?.('payment:status', failedEvent)
+ }
+ }
+
+ 
+ function onStatus (msg) {
     if (!payment.value || msg?.id !== payment.value.id) return
 
     status.value = msg.status || status.value
     paymentStore.setStatus(status.value)
 
     if (msg && typeof msg === 'object') {
-      Object.assign(serverData, msg.serverData || {})
-      paymentStore.mergeServerData(msg.serverData || {})
-      paymentStore.setLastEvent(msg)
+        Object.assign(serverData, msg.serverData || {})
+        paymentStore.mergeServerData(msg.serverData || {})
+        paymentStore.setLastEvent(msg)
     }
-
+    
+    const finalStep = steps.value.length - 1;
     if (['approved', 'failed', 'expired', 'canceled'].includes(status.value)) {
-      processing.value = false
-      if (status.value === 'approved') setStep(2)
+        processing.value = false
+        if (status.value === 'approved') setStep(finalStep)
     }
-  }
+ }
 
-  onMounted(() => {
-    $ws?.on?.('payment:status', onStatus)
-  })
-  onBeforeUnmount(() => {
-    $ws?.off?.('payment:status', onStatus)
-  })
+ onMounted(() => {
+ $ws?.on?.('payment:status', onStatus)
+ })
+ onBeforeUnmount(() => {
+ $ws?.off?.('payment:status', onStatus)
+ })
 
-  return {
-    // wizard
-    currentStep, steps, isCurrentStepValid,
-    step1Valid, step2Valid, next, prev, setStep,
+ return {
+ 
+ currentStep, steps, isCurrentStepValid,
+ stepAccountValid, stepAddressValid, stepPaymentValid, next, prev, setStep,
 
-    // form
-    formData,
+ 
+ formData,
 
-    // pagamento
-    payment, method, status, processing, serverData,
-    loadPayment, start,
-  }
+ 
+ payment, method, status, processing, serverData,
+ loadPayment, start,
+ }
 }

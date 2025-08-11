@@ -12,9 +12,12 @@ export async function buscarCep(cep) {
       street: data.logradouro,
       neighborhood: data.bairro,
       city: data.localidade,
+      state: data.estado
+
     }
   } catch (error) {
     console.error('Erro ao buscar CEP:', error)
     return null
   }
 }
+  

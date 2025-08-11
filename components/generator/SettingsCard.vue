@@ -15,52 +15,53 @@ const router = useRouter();
 const currentTab = ref(0);
 
 const { 
-  isLogoLoading,
-  template, header, footer, 
-  backgroundColor, formBackgroundColor, summaryBackgroundColor,
-  summaryPosition, showCouponField,
-  orderBumpEnabled, announcementBar, miniChat, themeColors
+ isLogoLoading,
+ template, header, footer, 
+ backgroundColor, formBackgroundColor, summaryBackgroundColor,
+ summaryPosition, showCouponField, showAddressFields,
+ orderBumpEnabled, announcementBar, miniChat, themeColors
 } = storeToRefs(generatorStore);
 
-function onLogoChange(file) { // A variável agora se chama 'file' (singular)
-  generatorStore.setHeaderLogo(file || null); // Passamos o 'file' diretamente
+function onLogoChange(file) { 
+ generatorStore.setHeaderLogo(file || null); 
 }
 
 function generateCheckout() {
-  if (typeof window !== 'undefined') {
-    sessionStorage.setItem('checkoutLogoUrl', header.value.logoUrl || '');
-  }
+ if (typeof window !== 'undefined') {
+ sessionStorage.setItem('checkoutLogoUrl', header.value.logoUrl || '');
+ }
 
-  const query = {
-    template: template.value,
-    backgroundColor: backgroundColor.value,
-    formBackgroundColor: formBackgroundColor.value,
-    summaryBackgroundColor: summaryBackgroundColor.value,
-    summaryPosition: summaryPosition.value,
-    showCouponField: showCouponField.value,
-    orderBumpEnabled: orderBumpEnabled.value,
-    headerBackgroundColor: header.value.backgroundColor,
-    headerElementsColor: header.value.elementsColor,
-    headerLogoPosition: header.value.logoPosition,
-    announcementBarText: announcementBar.value.text,
-    announcementBarCountdownText: announcementBar.value.countdownText,
-    announcementBarCountdownMinutes: announcementBar.value.countdownMinutes,
-    announcementBarColor: announcementBar.value.barColor,
-    announcementBarTextColor: announcementBar.value.textColor,
-    announcementBarCountdownColor: announcementBar.value.countdownColor,
-    miniChatEnabled: miniChat.value.enabled,
-    miniChatWelcomeMessage: miniChat.value.welcomeMessage,
-    miniChatCoupon: miniChat.value.coupon,
-    footerBackgroundColor: footer.value.backgroundColor,
-    footerTextColor: footer.value.textColor,
-    footerShowSupport: footer.value.showSupport,
-    footerShowWhatsapp: footer.value.showWhatsapp,
-    footerShowPhone: footer.value.showPhone,
-    footerShowEmail: footer.value.showEmail,
-    ...themeColors.value,
-  };
-   
-  router.push({ path: '/Checkout/pay_001', query });
+ const query = {
+ template: template.value,
+ backgroundColor: backgroundColor.value,
+ formBackgroundColor: formBackgroundColor.value,
+ summaryBackgroundColor: summaryBackgroundColor.value,
+ summaryPosition: summaryPosition.value,
+ showCouponField: showCouponField.value,
+ showAddressFields: showAddressFields.value,
+ orderBumpEnabled: orderBumpEnabled.value,
+ headerBackgroundColor: header.value.backgroundColor,
+ headerElementsColor: header.value.elementsColor,
+ headerLogoPosition: header.value.logoPosition,
+ announcementBarText: announcementBar.value.text,
+ announcementBarCountdownText: announcementBar.value.countdownText,
+ announcementBarCountdownMinutes: announcementBar.value.countdownMinutes,
+ announcementBarColor: announcementBar.value.barColor,
+ announcementBarTextColor: announcementBar.value.textColor,
+ announcementBarCountdownColor: announcementBar.value.countdownColor,
+ miniChatEnabled: miniChat.value.enabled,
+ miniChatWelcomeMessage: miniChat.value.welcomeMessage,
+ miniChatCoupon: miniChat.value.coupon,
+ footerBackgroundColor: footer.value.backgroundColor,
+ footerTextColor: footer.value.textColor,
+ footerShowSupport: footer.value.showSupport,
+ footerShowWhatsapp: footer.value.showWhatsapp,
+ footerShowPhone: footer.value.showPhone,
+ footerShowEmail: footer.value.showEmail,
+ ...themeColors.value,
+ };
+ 
+ router.push({ path: '/Checkout/pay_001', query });
 }
 </script>
 
@@ -74,6 +75,7 @@ function generateCheckout() {
  <VTabs v-model="currentTab" bg-color="transparent" grow class="mt-4">
  <VTab>Cabeçalho</VTab>
  <VTab>Rodapé</VTab>
+ <VTab>Formulário</VTab>
  <VTab>Resumo</VTab>
  <VTab>Aparência</VTab>
  <VTab>Order Bump</VTab>
@@ -102,12 +104,12 @@ function generateCheckout() {
  <VSheet border rounded class="pa-4">
  <VLabel class="mb-1">Logotipo</VLabel>
  <VFileInput 
-    label="Arraste a imagem ou clique aqui" 
-    variant="outlined" 
-    accept="image/png, image/jpeg" 
-    @update:model-value="onLogoChange" 
-    :loading="isLogoLoading"
-  />
+ label="Arraste a imagem ou clique aqui" 
+ variant="outlined" 
+ accept="image/png, image/jpeg" 
+ @update:model-value="onLogoChange" 
+ :loading="isLogoLoading"
+ />
  <p class="text-caption mt-1">Formatos .jpg e .png com menos de 500kb. Sugestão de tamanho: 300 x 90 px.</p>
  <VLabel class="mt-4">Posicionamento</VLabel>
  <VSelect v-model="header.logoPosition" :items="logoPositionOptions" variant="outlined" class="mt-1" />
@@ -154,6 +156,22 @@ function generateCheckout() {
  <VCheckbox v-model="footer.showPhone" label="Mostrar telefone/celular" />
  <VCheckbox v-model="footer.showEmail" label="Mostrar e-mail" />
  </div>
+ </VSheet>
+ </VWindowItem>
+
+ <VWindowItem class="pa-4">
+ <p class="text-h6 mb-4">Configurações do Formulário</p>
+ <VSheet border rounded class="pa-4">
+ <p class="text-subtitle-1 mb-2">Campos de Endereço</p>
+ <p class="text-caption">
+ Ative ou desative a seção de endereço no formulário de informações pessoais. 
+ Útil para produtos digitais que não exigem entrega.
+ </p>
+ <VSwitch 
+ v-model="showAddressFields" 
+ :label="showAddressFields ? 'Seção de endereço ativada' : 'Seção de endereço desativada'" 
+ class="mt-2" 
+ />
  </VSheet>
  </VWindowItem>
  
@@ -252,14 +270,14 @@ function generateCheckout() {
  <VCardActions class="pa-4">
  <VSpacer />
  <VBtn 
-    color="primary" 
-    variant="elevated" 
-    size="large" 
-    @click="generateCheckout"
-    :disabled="isLogoLoading"
-  >
-    {{ isLogoLoading ? 'Processando Imagem...' : 'Gerar e Visualizar Checkout' }}
-  </VBtn>
+ color="primary" 
+ variant="elevated" 
+ size="large" 
+ @click="generateCheckout"
+ :disabled="isLogoLoading"
+ >
+ {{ isLogoLoading ? 'Processando Imagem...' : 'Gerar e Visualizar Checkout' }}
+ </VBtn>
  </VCardActions>
  </VCard>
 </template>

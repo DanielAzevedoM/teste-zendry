@@ -1,8 +1,6 @@
 export const appearanceOptions = [
- { value: '#f0f2f5', title: 'Cinza Claro (Padrão)' },
- { value: '#ffffff', title: 'Branco' },
- { value: '#e3f2fd', title: 'Azul Claro' },
- { value: '#1e1e2f', title: 'Escuro' },
+ { value: '#C8C2E0', title: 'Cinza Claro (Padrão)' },
+ 
 ];
 
 export const summaryOptions = [

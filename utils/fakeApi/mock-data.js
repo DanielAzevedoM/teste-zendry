@@ -9,10 +9,8 @@ export const users = [
       city: 'Maceió',
       state: 'AL',
       country: 'BR',
-      zip: '57000000',
-      neighborhood: 'Ponta Verde',
-      complement: 'Apt 301',
-      street: 'Av. Álvaro Otacílio',
+      zip: '57052765',
+     
     },
     checkbox: true
   },

@@ -1,3 +1,5 @@
+// services/paymentApi.js
+
 import { createTransaction } from '@/services/transactionService'
 import { usePaymentStore } from '@/stores/paymentStore'
 
@@ -5,77 +7,80 @@ let _ws
 
 export function setWs (ws) { _ws = ws }
 
-// Busca de valores base da cobrança (mantém comportamento simulado atual)
-export async function fetchPayment (id) {
-  const payment = usePaymentStore()
-  await new Promise(r => setTimeout(r, 300))
 
-  return {
-    id,
-    amount: payment.amount,
-    discount: 2990,
-    total: 10000,
-    currency: 'BRL',
-  }
+export async function fetchPayment (id) {
+ const payment = usePaymentStore()
+ await new Promise(r => setTimeout(r, 300))
+
+ return {
+ id,
+ amount: payment.amount,
+ discount: 2990,
+ total: 10000,
+ currency: 'BRL',
+ }
 }
 
 
 export async function createPayment ({ id, method, payload }) {
-  // Simula latência da criação
-  await new Promise(r => setTimeout(r, 400))
+ 
+ await new Promise(r => setTimeout(r, 400))
 
-  // 1) Salva no "fake api" (transactions) com todos os dados que a tela pode querer exibir
-  const tx = await createTransaction({
-    orderId: id,
-    method,
-    ...payload, // esperado conter: amount, discount, buyer { name, id }, e detalhes do método
-  })
+ 
+ const tx = await createTransaction({
+ orderId: id,
+ method,
+ ...payload, 
+ })
 
-  // 2) Emite "processing" imediatamente, com os dados relevantes para a UI mostrar "aguardando confirmação"
-  _ws?.emit('payment:status', {
-    id,                     // mantém o mesmo id do fluxo (pedido)
-    status: 'processing',
-    method,
-    transactionId: tx.id,   // id interno do "fake api"
-    createdAt: tx.createdAt,
-    details: {
-      orderId: tx.orderId,
-      amount: tx.amount,
-      discount: tx.discount,
-      buyer: tx.buyer,      // { name, id }
-      methodDetails: tx.details || null, // dados específicos do método (ex: cartão mascarado, pix, boleto)
-    },
-  })
+ 
+ _ws?.emit('payment:status', {
+ id, 
+ status: 'processing',
+ method,
+ transactionId: tx.id, 
+ createdAt: tx.createdAt,
+ details: {
+ orderId: tx.orderId,
+ amount: tx.amount,
+ discount: tx.discount,
+ buyer: tx.buyer, 
+ methodDetails: tx.details || null, 
+ },
+ })
 
-  // 3) Emissão de "approved" após o delay do provedor (alinhado com transactionService)
-  setTimeout(() => {
-    _ws?.emit('payment:status', {
-      id,
-      status: 'approved',
-      method,
-      transactionId: tx.id,
-      approvedAt: new Date().toISOString(),
-    })
-  }, 3200) // ligeiramente acima do 3000ms do transactionService para garantir ordem dos eventos
+ 
+ setTimeout(() => {
+ _ws?.emit('payment:status', {
+ id,
+ status: 'approved',
+ method,
+ transactionId: tx.id,
+ approvedAt: new Date().toISOString(),
+ })
+ }, 3200) 
 
-  // 4) Retorno mantido por método, inclusive dados extras para PIX (se já for usado na tela)
-  if (method === 'credit_card') {
-    // Para cartão, apenas confirma depois — nada especial para retornar aqui
-    return { ok: true }
-  }
+ 
+ if (method === 'credit_card') {
+ 
+ return { ok: true }
+ }
 
-  if (method === 'pix') {
-    // Mantém a simulação atual com QR e expiração
-    const expiresAt = Date.now() + 3 * 60 * 1000
-    const qrBase64 = 'data:image/png;base64,iVBORw0KGgoAAA.' // QR fictício
-    return { ok: true, qrBase64, expiresAt }
-  }
+ if (method === 'pix') {
+ 
+ const expiresAt = Date.now() + 5 * 60 * 1000 
+ const qrCode = "00020101021226850014BR.GOV.BCB.PIX2560pixcodeexemplodepagamentofintech.com/pix/1234567890"
+ const qrCodeImage = "https://gerarqrcodepix.com.br/api/v1?brcode=00020126580014br.gov.bcb.pix0136a623122b-d341-4d1a-b850-9844a45a121552040000530398654041.005802BR5913APIDEMOPAGARME6009SAO%20PAULO62070503***6304E4A2&tamanho=256"
+ return { ok: true, qrCode, qrCodeImage, expiresAt }
+ }
 
-  if (method === 'boleto') {
-    // Para boleto, podemos retornar dados mínimos (linha digitável poderia estar no payload)
-    return { ok: true }
-  }
+ if (method === 'boleto') {
+ 
+ const boletoUrl = "https://www.boletobancario.com/boletofacil/img/boleto-facil-exemplo.png"
+ const linhaDigitavel = "34191.79001 01043.510047 91020.101014 1 93250000150000"
+ return { ok: true, boletoUrl, linhaDigitavel }
+ }
 
-  // Fallback genérico
-  return { ok: true }
+ 
+ return { ok: true }
 }

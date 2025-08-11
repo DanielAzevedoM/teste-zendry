@@ -79,7 +79,7 @@ const supportInfo = {
  
   <header class="pa-4 d-flex" :class="headerAlignmentClass" :style="headerStyle">
     <img v-if="header.logoUrl" :src="header.logoUrl" alt="Logo da Empresa" style="max-height: 50px; max-width: 250px;">
-    <h1 v-else class="text-h5" :style="{ color: header.elementsColor }">Finalize sua Compra</h1>
+    <img v-else src="@/public/logo-placeholder.png" alt="Logo da Empresa" style="max-height: 50px; max-width: 250px;"></img>
   </header>
  
  <div v-if="showAnnouncementBar" class="pa-2 text-center" :style="announcementBarStyle">
