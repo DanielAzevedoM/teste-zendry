@@ -56,7 +56,7 @@ export const paymentsMock = [
   {
     id: "pay_001",
     type: "", // pix | cartao | boleto
-    amount: 150.10, // valor original
+    amount: 150.00, // valor original
     discount:0,
     currency: "BRL",
     expiresAt: "2025-08-07T20:30:00Z",
@@ -108,8 +108,32 @@ export const cupons = [
         expiresAt: "2025-12-25T23:59:59Z"
     },
     {
-        code: "VERAO2026",
+        code: "BEMVINDO10",
         discount: 10,
         expiresAt: "2026-01-31T23:59:59Z"
     }
 ]
+
+export function findCouponByCode (code) {
+  if (!code) return null
+  return cupons.find(
+    c => c.code.toUpperCase() === String(code).trim().toUpperCase()
+  ) || null
+}
+
+export function calcCouponValue (coupon, amount) {
+  if (!coupon) return 0
+  const a = Number(amount || 0)
+
+  if (coupon.type === 'percent') {
+    const raw = Math.floor(a * (Number(coupon.value || 0) / 100))
+    const max = Number(coupon.max ?? raw)
+    return Math.max(0, Math.min(raw, max))
+  }
+
+  if (coupon.type === 'fixed') {
+    return Math.max(0, Number(coupon.value || 0))
+  }
+
+  return 0
+}

@@ -1,4 +1,5 @@
 import { createTransaction } from '@/services/transactionService'
+import { usePaymentStore } from '@/stores/paymentStore'
 
 let _ws
 
@@ -6,11 +7,12 @@ export function setWs (ws) { _ws = ws }
 
 // Busca de valores base da cobrança (mantém comportamento simulado atual)
 export async function fetchPayment (id) {
+  const payment = usePaymentStore()
   await new Promise(r => setTimeout(r, 300))
 
   return {
     id,
-    amount: 12990,
+    amount: payment.amount,
     discount: 2990,
     total: 10000,
     currency: 'BRL',

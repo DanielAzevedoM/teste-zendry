@@ -1,7 +1,7 @@
 <script setup>
 import { Country, State } from 'country-state-city'
 import { useAuthStore } from '~/stores/authStore'
-import { nextTick, onMounted } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   formData: { type: Object, required: true },
@@ -45,7 +45,6 @@ const rules = {
   minLetters: n => v => countLetters(v) >= n || `Nome precisa de pelo menos ${n} letras`,
 }
 
-
 // países/estados
 const countryOptions = Country.getAllCountries().map(c => ({ name: c.name, code: c.isoCode }))
 const stateOptions = computed(() => {
@@ -64,18 +63,11 @@ const formRef2 = ref(null)
 const isForm1Valid = ref(false)
 const isForm2Valid = ref(false)
 
-// SEMPRE que mudar, emite pro pai
+// emite pro pai quando mudar
 watch(isForm1Valid, v => emit('valid-step1', !!v))
 watch(isForm2Valid, v => emit('valid-step2', !!v))
 
-// garante que o estado inicial não fique “vermelho para sempre”
-onMounted(async () => {
-  await nextTick()
-  await formRef1.value?.validate()   // força validar
-  emit('valid-step1', !!isForm1Valid.value)
-  await formRef2.value?.validate()
-  emit('valid-step2', !!isForm2Valid.value)
-})
+// ⚠️ nada de validate() no onMounted — isso deixava tudo vermelho na carga
 </script>
 
 <template>
@@ -83,7 +75,7 @@ onMounted(async () => {
   <VForm
     ref="formRef1"
     v-model="isForm1Valid"
-    validate-on="input"    
+    validate-on="blur"             
     class="v-form-style mt-5"
   >
     <v-row>
@@ -112,38 +104,39 @@ onMounted(async () => {
           v-mask="'cpf'"
           label="CPF"
           variant="outlined"
-          maxlength="14" 
+          maxlength="14"
           :rules="[rules.required('CPF'), rules.onlyDigits('CPF'), rules.len('CPF', 11), rules.cpf]"
         />
       </v-col>
       <v-col>
         <VTextField
-            v-model="formData.phone"
-            label="Número de telefone"
-            variant="outlined"
-            type="tel"
-            inputmode="numeric"
-            :maxlength="11"
-            @update:modelValue="val => formData.phone = digitsMax(val, 11)"
-            :rules="[
-                rules.required('Telefone'),
-                rules.onlyDigits('Telefone'),
-                rules.lenBetween('Telefone', 10, 11)
-            ]"
-            />
+          v-model="formData.phone"
+          label="Número de telefone"
+          v-mask="'phone'"
+          variant="outlined"
+          type="tel"
+          inputmode="numeric"
+          :maxlength="15"
+          @update:model-value="val => formData.phone = digitsMax(val, 15)"
+          :rules="[
+            rules.required('Telefone'),
+            rules.onlyDigits('Telefone'),
+            rules.lenBetween('Telefone', 10, 11)
+          ]"
+        />
       </v-col>
     </v-row>
 
-   <VTextField
-  class="pt-2"
-  v-model="formData.name"
-  label="Nome completo"
-  variant="outlined"
-  :rules="[
-    rules.required('Nome completo'),
-    rules.minLetters(10)
-  ]"
-/>
+    <VTextField
+      class="pt-2"
+      v-model="formData.name"
+      label="Nome completo"
+      variant="outlined"
+      :rules="[
+        rules.required('Nome completo'),
+        rules.minLetters(10)
+      ]"
+    />
 
     <VCheckbox v-model="formData.checkbox" :label="'Deseja receber notificações por email?'" />
   </VForm>
@@ -152,7 +145,7 @@ onMounted(async () => {
   <VForm
     ref="formRef2"
     v-model="isForm2Valid"
-    validate-on="input"
+    validate-on="blur"             
     class="v-form-style mt-5"
   >
     <p class="pt-5 pb-5">Endereço do pagamento:</p>
@@ -180,7 +173,7 @@ onMounted(async () => {
           :disabled="!formData.address.country || stateOptions.length === 0"
           variant="underlined"
           density="comfortable"
-          :rules="[rules.required('Estado')]"
+          :rules="formData.address.country ? [rules.required('Estado')] : []"
         />
       </v-col>
     </v-row>
@@ -192,7 +185,7 @@ onMounted(async () => {
           v-mask="'cep'"
           label="CEP"
           variant="outlined"
-          maxlength="9"   
+          maxlength="9"
           :rules="[rules.required('CEP'), rules.onlyDigits('CEP'), rules.len('CEP', 8)]"
         />
       </v-col>
