@@ -1,55 +1,113 @@
-// pages/Checkout/[id]/index.vue
-
 <script setup>
-import AccountForm from '@/components/checkout/AccountForm.vue'
-import AddressForm from '@/components/checkout/AddressForm.vue'
-import OrderSummary from '@/components/checkout/OrderSummary.vue'
-import PaymentMethod from '@/components/checkout/PaymentMethod.vue'
-import PaymentConfirmation from '@/components/checkout/PaymentConfirmation.vue'
-import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router'
-import { useCheckout } from '@/composables/useCheckout'
+import { ref, computed, onMounted, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
+import { useCheckout } from '@/composables/useCheckout';
 import { useGeneratorStore } from '~/stores/generatorStore';
+import { usePaymentStore } from '~/stores/paymentStore';
+import { storeToRefs } from 'pinia';
 
-definePageMeta({
-  middleware: 'check-payment-exists',
-  layout: false,
-});
+import AccountForm from '@/components/checkout/AccountForm.vue';
+import AddressForm from '@/components/checkout/AddressForm.vue';
+import OrderSummary from '@/components/checkout/OrderSummary.vue';
+import PaymentMethod from '@/components/checkout/PaymentMethod.vue';
+import PaymentConfirmation from '@/components/checkout/PaymentConfirmation.vue';
+import CountdownTimer from '@/components/checkout/CountdownTimer.vue';
 
-const route = useRoute()
+definePageMeta({ layout: false });
+
+const route = useRoute();
 const generatorStore = useGeneratorStore();
+const paymentStore = usePaymentStore();
 
-generatorStore.setConfig(route.query);
+const { scripts } = storeToRefs(generatorStore);
 
-onMounted(() => {
-  if (typeof window !== 'undefined') {
-    const storedLogo = sessionStorage.getItem('checkoutLogoUrl');
-    if (storedLogo) {
-      generatorStore.header.logoUrl = storedLogo;
-    }
-  }
-});
+const isLoading = ref(true);
+const isConfigLoaded = ref(false);
+const errorMessage = ref('');
 
 const {
-  currentStep, steps, isCurrentStepValid,
+  steps, isCurrentStepValid,
   stepAccountValid, stepAddressValid, stepPaymentValid,
-  formData, payment,
-  next, prev, loadPayment,
-  start, method, status, processing, serverData,
-} = useCheckout()
+  formData, purchase,
+  next, prev,
+  processPayment, status, processing,
+  setupCheckout, showExpirationWarning, warningCountdownSeconds, isPurchaseCompleted
+} = useCheckout();
 
-await loadPayment(route.params.id)
+const { currentStep } = storeToRefs(paymentStore);
 
-const paymentRef = ref(null)
-const purchase = ref(null)
+const paymentRef = ref(null);
 const layoutName = computed(() => generatorStore.activeLayoutComponent);
-
 const paymentStepIndex = computed(() => generatorStore.showAddressFields ? 2 : 1);
 const finalStepIndex = computed(() => steps.value.length - 1);
 
 
+onMounted(async () => {
+  try {
+    const { isReady, error } = await setupCheckout(route.params.id);
+    if (error) {
+      errorMessage.value = error;
+    }
+    isConfigLoaded.value = isReady;
+  } catch (error) {
+    console.error('[CHECKOUT] Erro crítico durante a inicialização:', error);
+    errorMessage.value = error.message || 'Ocorreu um erro crítico ao carregar a página.';
+  } finally {
+    isLoading.value = false;
+  }
+});
+
+watchEffect(() => {
+  if (!isConfigLoaded.value) return;
+
+  const gtmId = scripts.value.googleTagManagerId;
+  const fbPixelId = scripts.value.facebookPixelId;
+
+  const scriptsToInject = [];
+  const noscriptsToInject = [];
+
+   if (gtmId) {
+    scriptsToInject.push({
+      children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https:\
+      })(window,document,'script','dataLayer','${gtmId}');`
+    });
+    noscriptsToInject.push({
+      tagPosition: 'bodyOpen',
+      children: `<iframe src="https:\ height="0" width="0" style="display:none;visibility:hidden"></iframe>`
+    });
+  }
+
+  // CORREÇÃO PARA FACEBOOK PIXEL
+  if (fbPixelId) {
+    scriptsToInject.push({
+      children: `!function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https:\
+      fbq('init', '${fbPixelId}');
+      fbq('track', 'PageView');`
+    });
+    noscriptsToInject.push({
+      children: `<img height="1" width="1" style="display:none" src="https:\ />`
+    });
+  }
+
+  useHead({
+    script: scriptsToInject,
+    noscript: noscriptsToInject,
+  });
+});
+
 async function concluirPagamento() {
   if (!isCurrentStepValid.value) return;
+
   let childOk = true;
   try {
     if (paymentRef.value?.concluirPagamento) {
@@ -58,22 +116,7 @@ async function concluirPagamento() {
     if (!childOk) return;
 
     const payload = paymentRef.value.getPayload();
-    await start(payment.value.id, payload.method, payload);
-    purchase.value = {
-      user: {
-        name: formData.name,
-        cpf: formData.cpf,
-        email: formData.email,
-      },
-      payment: {
-        id: payment.value.id,
-        method: payload.method,
-        amount: payment.value.amount,
-        discount: 0,
-        total: payment.value.amount,
-      },
-    };
-    next();
+    await processPayment(payload);
   } catch (e) {
     console.error('Erro ao concluir pagamento:', e);
   }
@@ -81,82 +124,76 @@ async function concluirPagamento() {
 </script>
 
 <template>
-  <NuxtLayout :name="layoutName">
-    <template #summary>
-      <OrderSummary />
-    </template>
+  <div>
+    <VDialog v-model="showExpirationWarning" width="auto">
+      <VCard color="warning" class="pa-4 text-center">
+        <VCardText>
+          <p class="text-h6">Atenção!</p>
+          Seu tempo está acabando. Conclua a compra para garantir seu pedido.
+          <CountdownTimer :initialSeconds="warningCountdownSeconds" countdown-text="Tempo restante:"
+            class="mt-2 justify-center font-weight-bold" />
+        </VCardText>
+        <VCardActions class="justify-center">
+          <VBtn @click="showExpirationWarning = false">Entendi</VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
 
-    <VRow justify="center">
-      <VCol cols="12" md="11">
+    <div v-if="isLoading" class="d-flex justify-center align-center fill-height" style="min-height: 100vh;">
+      <VProgressCircular indeterminate color="primary" />
+    </div>
+    <div v-else-if="errorMessage" class="d-flex justify-center align-center fill-height pa-4"
+      style="min-height: 100vh;">
+      <VAlert type="error" variant="tonal" border="start" prominent>
+        {{ errorMessage }}
+      </VAlert>
+    </div>
 
-        <VWindow v-model="currentStep" class="disable-tab-transition">
-          <VWindowItem>
-            <AccountForm 
-              :form-data="formData" 
-              :is-active="currentStep === 0"
-              @valid="stepAccountValid = $event" 
-            />
-          </VWindowItem>
+    <NuxtLayout v-if="isConfigLoaded && !errorMessage" :name="layoutName">
+      <template #summary>
+        <OrderSummary />
+      </template>
 
-          <VWindowItem v-if="generatorStore.showAddressFields">
-            <AddressForm 
-              :form-data="formData.address" 
-              :is-active="currentStep === 1"
-              @valid="stepAddressValid = $event" 
-            />
-          </VWindowItem>
-          
-          <VWindowItem>
-            <PaymentMethod 
-              ref="paymentRef" 
-              @valid="stepPaymentValid = $event" 
-            />
-          </VWindowItem>
+      <VRow justify="center">
+        <VCol cols="12" md="11">
+          <VWindow v-model="currentStep" class="disable-tab-transition">
+            <VWindowItem>
+              <AccountForm :form-data="formData" :is-active="currentStep === 0" @valid="stepAccountValid = $event" />
+            </VWindowItem>
 
-          <VWindowItem>
-            <PaymentConfirmation 
-              v-if="purchase || status !== 'idle'" 
-              :purchase="purchase" 
-              :status="status"
-              :method="method" 
-              :server-data="serverData" 
-            />
-          </VWindowItem>
-        </VWindow>
+            <VWindowItem v-if="generatorStore.showAddressFields">
+              <AddressForm :form-data="formData.address" :is-active="currentStep === 1"
+                @valid="stepAddressValid = $event" />
+            </VWindowItem>
 
-        <div v-if="currentStep < finalStepIndex"
-          class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8">
-          <VBtn 
-            color="secondary" 
-            variant="tonal" 
-            :disabled="currentStep === 0" 
-            @click="prev"
-          >
-            Anterior
-          </VBtn>
-          
-          <VBtn 
-            v-if="currentStep < paymentStepIndex" 
-            :disabled="!isCurrentStepValid" 
-            @click="next"
-            class="btn-navigation" 
-            variant="elevated"
-          >
-            Próximo
-          </VBtn>
-          
-          <VBtn 
-            v-if="currentStep === paymentStepIndex" 
-            color="success" 
-            :loading="processing"
-            :disabled="!isCurrentStepValid || processing" 
-            @click="concluirPagamento" 
-            variant="elevated"
-          >
-            {{ processing ? 'Processando...' : 'Concluir Pagamento' }}
-          </VBtn>
-        </div>
-      </VCol>
-    </VRow>
-  </NuxtLayout>
+            <VWindowItem>
+              <PaymentMethod ref="paymentRef" @valid="stepPaymentValid = $event" />
+            </VWindowItem>
+
+            <VWindowItem>
+              <PaymentConfirmation v-if="purchase || status !== 'idle'" :purchase="purchase" :status="status" />
+            </VWindowItem>
+          </VWindow>
+
+          <div v-if="currentStep < finalStepIndex"
+            class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8">
+            <VBtn color="secondary" variant="tonal" :disabled="currentStep === 0" @click="prev">
+              Anterior
+            </VBtn>
+
+            <VBtn v-if="currentStep < paymentStepIndex" :disabled="!isCurrentStepValid" @click="next"
+              class="btn-navigation" variant="elevated">
+              Próximo
+            </VBtn>
+
+            <VBtn v-if="currentStep === paymentStepIndex" color="success" :loading="processing"
+              :disabled="!isCurrentStepValid || processing || isPurchaseCompleted" @click="concluirPagamento"
+              variant="elevated">
+              {{ processing ? 'Processando...' : 'Concluir Pagamento' }}
+            </VBtn>
+          </div>
+        </VCol>
+      </VRow>
+    </NuxtLayout>
+  </div>
 </template>

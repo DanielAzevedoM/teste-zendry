@@ -1,169 +1,185 @@
 import { defineStore } from 'pinia';
-import { 
- appearanceOptions,
- summaryOptions,
- orderBumpOptions,
- logoPositionOptions,
-} from '~/config/generatorOptions';
 
 export const useGeneratorStore = defineStore('generator', {
  state: () => ({
- isLogoLoading: false, 
- template: 'standard',
- backgroundColor: appearanceOptions[0].value,
- formBackgroundColor: '#FFFFFF',
- summaryBackgroundColor: '#FAFAFA',
- summaryPosition: summaryOptions[0].value,
- showCouponField: true,
- showAddressFields: true, 
- orderBumpEnabled: orderBumpOptions[1].value,
- 
- themeColors: {
- primaryButtonBg: '#3FC583',
- primaryButtonText: '#FFFFFF',
- navigationButtonBg: '#1E88E5',
- navigationButtonText: '#FFFFFF',
- titles: '#666666',
- descriptions: '#666666',
- activeStep: '#999999',
- totalValue: '#44C485',
- stepTagBg: '#333333',
- stepTagText: '#FFFFFF',
- discountTagBg: '#725BC2',
- discountTagText: '#FFFFFF',
- progressBar: '#36B376',
- progressBarText: '#FFFFFF',
- },
-
- header: {
- backgroundColor: '#181B4DA4',
- elementsColor: '#FFFFFF',
- logoFile: null,
- logoUrl: null,
- logoPosition: logoPositionOptions[0].value,
- },
- announcementBar: {
- text: '',
- countdownText: 'Oferta termina em',
- countdownMinutes: 0,
- barColor: '#773CBC',
- textColor: '#FFFFFF',
- countdownColor: '#FFC926',
- },
- miniChat: {
- enabled: false,
- welcomeMessage: 'Olá! Bem-vindo ao nosso checkout. Use o cupom BEMVINDO10 para 10% de desconto!',
- coupon: 'BEMVINDO10',
- },
- footer: {
- backgroundColor: '#001729',
- textColor: '#666666',
- showSupport: true,
- showWhatsapp: false,
- showPhone: false,
- showEmail: false,
- },
+  isLogoLoading: false,
+  template: 'standard',
+  backgroundColor: "#C8C2E0",
+  formBackgroundColor: '#FFFFFF',
+  summaryBackgroundColor: '#FAFAFA',
+  summaryPosition: 'right',
+  showCouponField: true,
+  showAddressFields: true,
+  themeColors: {
+   primaryButtonBg: '#3FC583',
+   primaryButtonText: '#FFFFFF',
+   navigationButtonBg: '#1E88E5',
+   navigationButtonText: '#FFFFFF',
+   titles: '#666666',
+   descriptions: '#666666',
+   totalValue: '#44C485',
+  },
+  header: {
+   backgroundColor: '#181B4DA4',
+   elementsColor: '#FFFFFF',
+   logoFile: null,
+   logoUrl: null,
+   logoPosition: 'left',
+  },
+  announcementBar: {
+   text: '',
+   countdownText: 'Oferta termina em',
+   countdownMinutes: 0,
+   barColor: '#773CBC',
+   textColor: '#FFFFFF',
+   countdownColor: '#FFC926',
+  },
+  miniChat: {
+   enabled: true,
+   welcomeMessage: 'Olá! Bem-vindo ao nosso checkout. Use o cupom BEMVINDO10 para 10% de desconto!',
+   coupon: 'BEMVINDO10',
+   showOnConfirmation: false,
+   confirmationMessage: 'Obrigado por sua compra! ✨'
+  },
+  footer: {
+   backgroundColor: '#001729',
+   textColor: '#666666',
+   showSupport: true,
+   showWhatsapp: false,
+   whatsapp: '(99) 99999-9999',
+   showPhone: false,
+   phone: '0800 000 0000',
+   showEmail: false,
+   email: 'suporte@suaempresa.com',
+  },
+  paymentSettings: {
+    allowedMethods: {
+      card: true,
+      pix: true,
+      boleto: true
+    },
+    allowMultiPayments: false,
+    multiPaymentsMinCardValue: 50.00,
+    installmentsMinParcelValue: 5.00,
+    captureIp: true,
+    checkoutExpiration: {
+      enabled: false,
+      durationMinutes: 8,
+      warningMinutes: 4
+    },
+    interestRates: {
+      '1': 0, '2': 4.59, '3': 5.99, '4': 7.89, '5': 9.15, '6': 10.99,
+      '7': 12.50, '8': 13.99, '9': 15.25, '10': 16.89, '11': 18.50, '12': 19.99
+    },
+  },
+  // NOVA SEÇÃO ADICIONADA
+  scripts: {
+    googleTagManagerId: '',
+    facebookPixelId: '',
+  },
  }),
 
  getters: {
- activeLayoutComponent: (state) => `checkout-${state.template}`,
+  activeLayoutComponent: (state) => `checkout-${state.template}`,
+  finalStepIndex: (state) => {
+    return state.showAddressFields ? 3 : 2;
+  }
  },
 
  actions: {
- setHeaderLogo(file) {
- if (!file) {
- this.header.logoFile = null;
- this.header.logoUrl = null;
- return;
- }
- 
- this.isLogoLoading = true;
- this.header.logoFile = file;
- const reader = new FileReader();
- 
- reader.onload = (e) => {
- this.header.logoUrl = e.target.result;
- this.isLogoLoading = false;
- };
- 
- reader.onerror = () => {
- this.isLogoLoading = false;
- console.error("Erro ao ler o arquivo de imagem.");
- }
-
- reader.readAsDataURL(file);
- },
- resetHeaderColors() {
- this.header.backgroundColor = '#FFFFFF';
- this.header.elementsColor = '#666666';
- },
- resetAnnouncementBarColors() {
- this.announcementBar.barColor = '#773CBC';
- this.announcementBar.textColor = '#FFFFFF';
- this.announcementBar.countdownColor = '#FFC926';
- },
- resetFooterColors() {
- this.footer.backgroundColor = '#F7F7F8';
- this.footer.textColor = '#666666';
- },
- resetAppearanceColors() {
- this.backgroundColor = appearanceOptions[0].value;
- this.formBackgroundColor = '#FFFFFF';
- this.summaryBackgroundColor = '#FAFAFA';
- this.themeColors.primaryButtonBg = '#3FC583';
- this.themeColors.primaryButtonText = '#FFFFFF';
- this.themeColors.navigationButtonBg = '#1E88E5';
- this.themeColors.navigationButtonText = '#FFFFFF';
- this.themeColors.titles = '#666666';
- this.themeColors.descriptions = '#666666';
- this.themeColors.activeStep = '#999999';
- this.themeColors.totalValue = '#44C485';
- this.themeColors.stepTagBg = '#333333';
- this.themeColors.stepTagText = '#FFFFFF';
- this.themeColors.discountTagBg = '#725BC2';
- this.themeColors.discountTagText = '#FFFFFF';
- this.themeColors.progressBar = '#36B376';
- this.themeColors.progressBarText = '#FFFFFF';
- },
- 
- setConfig(config) {
- if (config.template) this.template = config.template;
- if (config.backgroundColor) this.backgroundColor = config.backgroundColor;
- if (config.formBackgroundColor) this.formBackgroundColor = config.formBackgroundColor;
- if (config.summaryBackgroundColor) this.summaryBackgroundColor = config.summaryBackgroundColor;
- if (config.summaryPosition) this.summaryPosition = config.summaryPosition;
- if (config.showCouponField !== undefined) this.showCouponField = config.showCouponField === 'true';
- if (config.showAddressFields !== undefined) this.showAddressFields = config.showAddressFields === 'true';
- if (config.orderBumpEnabled !== undefined) this.orderBumpEnabled = config.orderBumpEnabled === 'true';
-
- Object.keys(this.themeColors).forEach(key => {
- if (config[key]) {
- this.themeColors[key] = config[key];
- }
- });
-
- if (config.headerBackgroundColor) this.header.backgroundColor = config.headerBackgroundColor;
- if (config.headerElementsColor) this.header.elementsColor = config.headerElementsColor;
- if (config.headerLogoPosition) this.header.logoPosition = config.headerLogoPosition;
- if (config.logoUrl) this.header.logoUrl = config.logoUrl;
-
- if (config.announcementBarText) this.announcementBar.text = config.announcementBarText;
- if (config.announcementBarCountdownText) this.announcementBar.countdownText = config.announcementBarCountdownText;
- if (config.announcementBarCountdownMinutes) this.announcementBar.countdownMinutes = Number(config.announcementBarCountdownMinutes);
- if (config.announcementBarColor) this.announcementBar.barColor = config.announcementBarColor;
- if (config.announcementBarTextColor) this.announcementBar.textColor = config.announcementBarTextColor;
- if (config.announcementBarCountdownColor) this.announcementBar.countdownColor = config.announcementBarCountdownColor;
-
- if (config.miniChatEnabled !== undefined) this.miniChat.enabled = config.miniChatEnabled === 'true';
- if (config.miniChatWelcomeMessage) this.miniChat.welcomeMessage = config.miniChatWelcomeMessage;
- if (config.miniChatCoupon) this.miniChat.coupon = config.miniChatCoupon;
-
- if (config.footerBackgroundColor) this.footer.backgroundColor = config.footerBackgroundColor;
- if (config.footerTextColor) this.footer.textColor = config.footerTextColor;
- if (config.footerShowSupport !== undefined) this.footer.showSupport = config.footerShowSupport === 'true';
- if (config.footerShowWhatsapp !== undefined) this.footer.showWhatsapp = config.footerShowWhatsapp === 'true';
- if (config.footerShowPhone !== undefined) this.footer.showPhone = config.footerShowPhone === 'true';
- if (config.footerShowEmail !== undefined) this.footer.showEmail = config.footerShowEmail === 'true';
- },
+  setHeaderLogo(file) {
+   if (!file) {
+    this.header.logoFile = null;
+    this.header.logoUrl = null;
+    return;
+   }
+   this.isLogoLoading = true;
+   this.header.logoFile = file;
+   const reader = new FileReader();
+   reader.onload = (e) => {
+    this.header.logoUrl = e.target.result;
+    this.isLogoLoading = false;
+   };
+   reader.onerror = () => {
+    this.isLogoLoading = false;
+    console.error("Erro ao ler o arquivo de imagem.");
+   }
+   reader.readAsDataURL(file);
+  },
+  resetHeaderColors() {
+   this.header.backgroundColor = '#181B4DA4';
+   this.header.elementsColor = '#FFFFFF';
+  },
+  resetAnnouncementBarColors() {
+   this.announcementBar.barColor = '#773CBC';
+   this.announcementBar.textColor = '#FFFFFF';
+   this.announcementBar.countdownColor = '#FFC926';
+  },
+  resetFooterColors() {
+   this.footer.backgroundColor = '#001729';
+   this.footer.textColor = '#666666';
+  },
+  resetAppearanceColors() {
+   this.backgroundColor = '#C8C2E0';
+   this.formBackgroundColor = '#FFFFFF';
+   this.summaryBackgroundColor = '#FAFAFA';
+   this.themeColors.primaryButtonBg = '#3FC583';
+   this.themeColors.primaryButtonText = '#FFFFFF';
+   this.themeColors.navigationButtonBg = '#1E88E5';
+   this.themeColors.navigationButtonText = '#FFFFFF';
+   this.themeColors.titles = '#666666';
+   this.themeColors.descriptions = '#666666';
+   this.themeColors.totalValue = '#44C485';
+  },
+  resetPaymentSettings() {
+    this.paymentSettings.allowedMethods = { card: true, pix: true, boleto: true };
+    this.paymentSettings.allowMultiPayments = false;
+    this.paymentSettings.multiPaymentsMinCardValue = 50.00;
+    this.paymentSettings.installmentsMinParcelValue = 5.00;
+    this.paymentSettings.captureIp = true;
+    this.paymentSettings.checkoutExpiration = { enabled: false, durationMinutes: 8, warningMinutes: 4 };
+  },
+  // NOVA AÇÃO ADICIONADA
+  resetScripts() {
+    this.scripts.googleTagManagerId = '';
+    this.scripts.facebookPixelId = '';
+  },
+  setConfig(config) {
+   if (config.template) this.template = config.template;
+   if (config.backgroundColor) this.backgroundColor = config.backgroundColor;
+   if (config.formBackgroundColor) this.formBackgroundColor = config.formBackgroundColor;
+   if (config.summaryBackgroundColor) this.summaryBackgroundColor = config.summaryBackgroundColor;
+   if (config.summaryPosition) this.summaryPosition = config.summaryPosition;
+   if (config.showCouponField !== undefined) this.showCouponField = config.showCouponField;
+   if (config.showAddressFields !== undefined) this.showAddressFields = config.showAddressFields;
+   if (config.themeColors) {
+    this.themeColors = { ...this.themeColors, ...config.themeColors };
+   }
+   if (config.header) {
+    this.header = { ...this.header, ...config.header };
+   }
+   if (config.announcementBar) {
+    if(config.announcementBar.countdownMinutes) {
+     config.announcementBar.countdownMinutes = Number(config.announcementBar.countdownMinutes);
+    }
+    this.announcementBar = { ...this.announcementBar, ...config.announcementBar };
+   }
+   if (config.miniChat) {
+    this.miniChat = { ...this.miniChat, ...config.miniChat };
+   }
+   if (config.footer) {
+    this.footer = { ...this.footer, ...config.footer };
+   }
+   if (config.paymentSettings) {
+    const newSettings = { ...this.paymentSettings, ...config.paymentSettings };
+    newSettings.allowedMethods = { ...this.paymentSettings.allowedMethods, ...config.paymentSettings.allowedMethods };
+    newSettings.checkoutExpiration = { ...this.paymentSettings.checkoutExpiration, ...config.paymentSettings.checkoutExpiration };
+    this.paymentSettings = newSettings;
+   }
+   // LÓGICA ADICIONADA PARA CARREGAR OS SCRIPTS
+   if (config.scripts) {
+    this.scripts = { ...this.scripts, ...config.scripts };
+   }
+  },
  },
 });

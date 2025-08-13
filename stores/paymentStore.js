@@ -1,35 +1,41 @@
-// stores/payment.js
+// stores/paymentStore.js
+
 import { defineStore } from 'pinia'
-// (opcional) mock; troque por chamada real ao seu backend
 import { findCouponByCode, calcCouponValue } from '~/utils/fakeApi/mock-data'
 
 export const usePaymentStore = defineStore('payment', {
   state: () => ({
-    payment: null,        // { id, amount, discount, currency, ... }
+    payment: null,
     method: null,
     status: 'idle',
     serverData: {},
     lastEvent: null,
 
-    // espelho do cupom ativo do Summary
-    couponCode: '',       // código do cupom ativo (vindo do Summary)
-    couponMeta: null,     // objeto do mock (para recalcular quando amount muda)
-    coupon: 0,            // valor do cupom em centavos já calculado
+    couponCode: '',
+    couponMeta: null,
+    coupon: 0,
+    
+    // ADICIONADO
+    currentStep: 0,
   }),
 
   getters: {
     total (state) {
       const a = Number(state.payment?.amount || 0)
       const d = Number(state.payment?.discount || 0)
-      const c = Number(state.coupon || 0) // <- usa o espelho do Summary
+      const c = Number(state.coupon || 0)
       return Math.max(0, a - d - c)
     },
   },
 
   actions: {
+    // ADICIONADO
+    setCurrentStep (step) {
+      this.currentStep = step
+    },
+
     setPayment (payment) {
-      this.payment = payment 
-      // sempre que amount/discount mudar, recalcula o cupom já ativo
+      this.payment = payment
       this._recalcCoupon()
     },
 
@@ -46,8 +52,6 @@ export const usePaymentStore = defineStore('payment', {
       this.lastEvent = evt
     },
 
-    // ===== Cupom vindo do OrderSummary =====
-    // Chame isto no momento que o Summary ativar/trocar o cupom
     setCouponFromOrderSummary (code) {
       const clean = String(code || '').trim()
       this.couponCode = clean
@@ -55,14 +59,12 @@ export const usePaymentStore = defineStore('payment', {
       this._recalcCoupon()
     },
 
-    // Se o Summary limpar o cupom, chame isto
     clearCouponFromOrderSummary () {
       this.couponCode = ''
       this.couponMeta = null
       this.coupon = 0
     },
 
-    // Recalcula com base no amount atual + metadados do mock
     _recalcCoupon () {
       if (!this.payment) return
       this.coupon = calcCouponValue(this.couponMeta, this.payment.amount)
@@ -77,7 +79,7 @@ export const usePaymentStore = defineStore('payment', {
       this.couponCode = ''
       this.couponMeta = null
       this.coupon = 0
+      this.currentStep = 0 // Resetar a etapa
     },
   },
 })
-

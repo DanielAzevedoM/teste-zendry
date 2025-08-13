@@ -1,13 +1,11 @@
-// components/checkout/AddressForm.vue
-
 <script setup>
 import { Country, State } from 'country-state-city'
 import { ref, watch, computed, onMounted } from 'vue'
 import { buscarCep } from '~/services/cepService';
 
 const props = defineProps({
-  formData: { type: Object, required: true },
-  isActive: { type: Boolean, default: false },
+ formData: { type: Object, required: true },
+ isActive: { type: Boolean, default: false },
 })
 const emit = defineEmits(['valid'])
 
@@ -16,64 +14,53 @@ const formData = props.formData
 const onlyDigits = v => (v || '').toString().replace(/\D/g, '')
 
 const rules = {
-  required: label => v => (v ?? '').toString().trim() !== '' || `${label} é obrigatório`,
-  len: (label, n) => v => onlyDigits(v).length === n || `${label} deve ter ${n} dígitos`,
-  cepValido: async (v) => {
-    const cep = onlyDigits(v);
-    if (cep.length !== 8) return true; 
-    const dados = await buscarCep(cep);
-    return dados ? true : 'CEP inválido ou não encontrado';
-  },
+ required: label => v => (v ?? '').toString().trim() !== '' || `${label} é obrigatório`,
+ len: (label, n) => v => onlyDigits(v).length === n || `${label} deve ter ${n} dígitos`,
+ cepValido: async (v) => {
+ const cep = onlyDigits(v);
+ if (cep.length !== 8) return true; 
+ const dados = await buscarCep(cep);
+ return dados ? true : 'CEP inválido ou não encontrado';
+ },
 }
 
 const countryOptions = Country.getAllCountries().map(c => ({ name: c.name, code: c.isoCode }))
 const stateOptions = computed(() => {
-  const cc = formData.country
-  if (!cc) return []
-  return State.getStatesOfCountry(cc).map(s => ({ name: s.name, code: s.isoCode }))
+ const cc = formData.country
+ if (!cc) return []
+ return State.getStatesOfCountry(cc).map(s => ({ name: s.name, code: s.isoCode }))
 })
 watch(() => formData.country, (newValue, oldValue) => {
-  if (oldValue !== undefined && newValue !== oldValue) {
-    formData.state = '';
-  }
+ if (oldValue !== undefined && newValue !== oldValue) {
+ formData.state = '';
+ }
 })
 
-// Lógica de Validação
 const formRef = ref(null)
 const isFormValid = ref(false)
 watch(isFormValid, v => emit('valid', !!v))
 
 onMounted(() => {
-  // Garante que o país padrão (Brasil) seja definido se não houver um
-  if (!formData.country) {
-    formData.country = 'BR';
-  }
-  // Valida o formulário assim que ele é montado
-  setTimeout(() => formRef.value?.validate(), 100);
+ if (!formData.country) {
+ formData.country = 'BR';
+ }
 });
 
-watch(() => props.isActive, (isActive) => {
-  if (isActive) {
-    setTimeout(() => formRef.value?.validate(), 100);
-  }
-});
-
-// Watch para buscar dados do CEP
 watch(() => formData.zip, async (novoCep) => {
-  const cep = (novoCep || '').replace(/\D/g, '');
-  if (cep.length === 8) {
-    try {
-      const dados = await buscarCep(cep);
-      if (dados) {
-        formData.street = dados.street || '';
-        formData.neighborhood = dados.neighborhood || '';
-        formData.city = dados.city || '';
-        formData.state = dados.state || '';
-      }
-    } catch (error) {
-      console.error('Erro ao buscar CEP no formulário de endereço:', error);
-    }
-  }
+ const cep = (novoCep || '').replace(/\D/g, '');
+ if (cep.length === 8) {
+ try {
+ const dados = await buscarCep(cep);
+ if (dados) {
+ formData.street = dados.street || '';
+ formData.neighborhood = dados.neighborhood || '';
+ formData.city = dados.city || '';
+ formData.state = dados.state || '';
+ }
+ } catch (error) {
+ console.error('Erro ao buscar CEP no formulário de endereço:', error);
+ }
+ }
 });
 </script>
 

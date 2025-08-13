@@ -1,12 +1,10 @@
-// components/checkout/AccountForm.vue
-
 <script setup>
 import { useAuthStore } from '~/stores/authStore'
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
-  formData: { type: Object, required: true },
-  isActive: { type: Boolean, default: false },
+ formData: { type: Object, required: true },
+ isActive: { type: Boolean, default: false },
 })
 const emit = defineEmits(['valid'])
 
@@ -18,50 +16,37 @@ const digitsMax = (v, max) => onlyDigits(String(v ?? '')).slice(0, max)
 const countLetters = v => (String(v || '').match(/[A-Za-zÀ-ÿ]/g) || []).length
 
 function isValidCPF(cpf) {
-  const s = onlyDigits(cpf)
-  if (s.length !== 11) return false
-  if (/^(\d)\1+$/.test(s)) return false
-  const calc = base => {
-    let sum = 0
-    for (let i = 0; i < base.length; i++) sum += parseInt(base[i]) * (base.length + 1 - i)
-    const mod = (sum * 10) % 11
-    return mod === 10 ? 0 : mod
-  }
-  const d1 = calc(s.slice(0, 9))
-  const d2 = calc(s.slice(0, 10))
-  return d1 === parseInt(s[9]) && d2 === parseInt(s[10])
+ const s = onlyDigits(cpf)
+ if (s.length !== 11) return false
+ if (/^(\d)\1+$/.test(s)) return false
+ const calc = base => {
+ let sum = 0
+ for (let i = 0; i < base.length; i++) sum += parseInt(base[i]) * (base.length + 1 - i)
+ const mod = (sum * 10) % 11
+ return mod === 10 ? 0 : mod
+ }
+ const d1 = calc(s.slice(0, 9))
+ const d2 = calc(s.slice(0, 10))
+ return d1 === parseInt(s[9]) && d2 === parseInt(s[10])
 }
 
 const rules = {
-  required: label => v => (v ?? '').toString().trim() !== '' || `${label} é obrigatório`,
-  email: v => /^\S+@\S+\.\S+$/.test(String(v)) || 'E-mail inválido',
-  onlyDigits: label => v => /^\d+$/.test(onlyDigits(v)) || `${label} deve conter apenas números`,
-  len: (label, n) => v => onlyDigits(v).length === n || `${label} deve ter ${n} dígitos`,
-  lenBetween: (label, min, max) => v => {
-    const d = onlyDigits(v).length
-    return (d >= min && d <= max) || `${label} deve ter entre ${min} e ${max} dígitos`
-  },
-  cpf: v => (onlyDigits(v).length === 11 && isValidCPF(v)) || 'CPF inválido',
-  minLetters: n => v => countLetters(v) >= n || `Nome precisa de pelo menos ${n} letras`,
+ required: label => v => (v ?? '').toString().trim() !== '' || `${label} é obrigatório`,
+ email: v => /^\S+@\S+\.\S+$/.test(String(v)) || 'E-mail inválido',
+ onlyDigits: label => v => /^\d+$/.test(onlyDigits(v)) || `${label} deve conter apenas números`,
+ len: (label, n) => v => onlyDigits(v).length === n || `${label} deve ter ${n} dígitos`,
+ lenBetween: (label, min, max) => v => {
+ const d = onlyDigits(v).length
+ return (d >= min && d <= max) || `${label} deve ter entre ${min} e ${max} dígitos`
+ },
+ cpf: v => (onlyDigits(v).length === 11 && isValidCPF(v)) || 'CPF inválido',
+ minLetters: n => v => countLetters(v) >= n || `Nome precisa de pelo menos ${n} letras`,
 }
 
 const formRef = ref(null)
 const isFormValid = ref(false)
 
 watch(isFormValid, v => emit('valid', !!v))
-
-onMounted(() => {
-  // Valida o formulário assim que ele é montado
-  setTimeout(() => formRef.value?.validate(), 100);
-})
-
-watch(() => props.isActive, (isActive) => {
-  if (isActive) {
-    setTimeout(() => {
-      formRef.value?.validate();
-    }, 100);
-  }
-});
 </script>
 
 <template>

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ord_e170a299-8902-4e1c-8b2a-59871899a208",
+    "amount": 200,
+    "discount": null,
+    "customerIdentifier": "danielazevedom27@gmail.com",
+    "configId": "9445ffaa-d24d-4460-b774-96db04b237f8",
+    "status": "PAGO",
+    "createdAt": "2025-08-13T04:22:11.479Z",
+    "paymentDetails": {
+      "ipAddress": "::1"
+    }
+  },
+  {
+    "id": "ord_fcc20ecf-c134-4556-ad03-61c0ce944bf3",
+    "amount": 200,
+    "discount": null,
+    "customerIdentifier": "",
+    "configId": "ed740835-0902-469a-8489-df1239a83265",
+    "status": "EXPIRADO",
+    "createdAt": "2025-08-13T06:38:33.056Z",
+    "paymentDetails": {
+      "ipAddress": "::1"
+    }
+  },
+  {
+    "id": "ord_ffb4feae-d965-442d-99cb-5f8523a4d6ad",
+    "amount": 200,
+    "discount": 20,
+    "customerIdentifier": "",
+    "configId": "07eda60f-3bb3-448f-95ff-7c94012bb715",
+    "status": "PAGO",
+    "createdAt": "2025-08-13T12:20:59.482Z",
+    "paymentDetails": {
+      "ipAddress": "::1"
+    }
+  }
+]

@@ -10,7 +10,7 @@ export const users = [
       state: 'AL',
       country: 'BR',
       zip: '57052765',
-     
+
     },
     checkbox: true
   },
@@ -53,16 +53,16 @@ export const users = [
 export const paymentsMock = [
   {
     id: "pay_001",
-    type: "", // pix | cartao | boleto
-    amount: 150.00, // valor original
-    discount:0,
+    type: "",
+    amount: 150.00,
+    discount: 50,
     currency: "BRL",
     expiresAt: "2025-08-07T20:30:00Z",
     isCompleted: false,
-    qrCode: "00020101021226850014BR.GOV.BCB.PIX2560pixcodeexemplodepagamentofintech.com/pix/1234567890", // PIX
-    qrCodeImage: "https://fakeimg.pl/300x300/?text=QR+Code",
+    qrCode: "00020101021226850014BR.GOV.BCB.PIX2560pixcodeexemplodepagamentofintech.com/pix/1234567890",
+    qrCodeImage: "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=00020101021226850014BR.GOV.BCB.PIX2560pixcodeexemplodepagamentofintech.com/pix/1234567890",
     customer: {
-      id:""
+      id: ""
     }
   },
   {
@@ -71,10 +71,10 @@ export const paymentsMock = [
     amount: 89.90,
     discount: 0,
     currency: "BRL",
-    expiresAt: null, // cartão geralmente não expira o checkout
+    expiresAt: null,
     isCompleted: true,
     customer: {
-      id:""
+      id: ""
     },
     cardLastDigits: "1234",
     authorizationCode: "A1B2C3"
@@ -87,44 +87,49 @@ export const paymentsMock = [
     currency: "BRL",
     expiresAt: "2025-08-10T23:59:59Z",
     isCompleted: false,
-    boletoUrl: "https://example.com/boleto/123456",
+    boletoUrl: "https://www.google.com",
     customer: {
-      id:""
+      id: ""
     }
   }
 ]
 
+// #### INÍCIO DA MODIFICAÇÃO ####
 export const cupons = [
-    {
-        code: "BLACKFRIDAY",
-        discount: 20,
-        expiresAt: "2025-11-30T23:59:59Z"
-    },
-    {
-        code: "NATAL2025",
-        discount: 15,
-        expiresAt: "2025-12-25T23:59:59Z"
-    },
-    {
-        code: "BEMVINDO10",
-        discount: 10,
-        expiresAt: "2026-01-31T23:59:59Z"
-    }
+  {
+    code: "BLACKFRIDAY",
+    type: "percent", // Adicionado
+    value: 20,      // Renomeado de 'discount' para 'value'
+    expiresAt: "2025-11-30T23:59:59Z"
+  },
+  {
+    code: "NATAL2025",
+    type: "percent", // Adicionado
+    value: 15,      // Renomeado de 'discount' para 'value'
+    expiresAt: "2025-12-25T23:59:59Z"
+  },
+  {
+    code: "BEMVINDO10",
+    type: "percent", // Adicionado
+    value: 10,      // Renomeado de 'discount' para 'value'
+    expiresAt: "2026-01-31T23:59:59Z"
+  }
 ]
+// #### FIM DA MODIFICAÇÃO ####
 
-export function findCouponByCode (code) {
+export function findCouponByCode(code) {
   if (!code) return null
   return cupons.find(
     c => c.code.toUpperCase() === String(code).trim().toUpperCase()
   ) || null
 }
 
-export function calcCouponValue (coupon, amount) {
+export function calcCouponValue(coupon, amount) {
   if (!coupon) return 0
   const a = Number(amount || 0)
 
   if (coupon.type === 'percent') {
-    const raw = Math.floor(a * (Number(coupon.value || 0) / 100))
+    const raw = a * (Number(coupon.value || 0) / 100)
     const max = Number(coupon.max ?? raw)
     return Math.max(0, Math.min(raw, max))
   }

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "cust_001",
+    "name": "Daniel Azevêdo",
+    "email": "danielazevedom@hotmail.com",
+    "cpf": "05782615532",
+    "phone": "82999999999",
+    "address": {
+      "street": "Rua Fictícia",
+      "neighborhood": "Bairro Inventado",
+      "city": "Maceió",
+      "state": "AL",
+      "zip": "57052765",
+      "country": "BR",
+      "complement": "Apto 101"
+    }
+  }
+]

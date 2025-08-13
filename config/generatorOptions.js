@@ -1,16 +1,8 @@
-export const appearanceOptions = [
- { value: '#C8C2E0', title: 'Cinza Claro (Padrão)' },
- 
-];
+
 
 export const summaryOptions = [
  { value: 'right', title: 'Na Direita' },
  { value: 'left', title: 'Na Esquerda' },
-];
-
-export const orderBumpOptions = [
- { value: true, title: 'Ativado' },
- { value: false, title: 'Desativado' },
 ];
 
 export const logoPositionOptions = [

@@ -1,0 +1,410 @@
+[
+  {
+    "id": "7a115a00-ea37-4c07-9333-669ee53b87ad",
+    "name": "Configuração 12/08/2025, 23:29:41",
+    "template": "standard",
+    "backgroundColor": "#C8C2E0",
+    "formBackgroundColor": "#FFFFFF",
+    "summaryBackgroundColor": "#FAFAFA",
+    "summaryPosition": "right",
+    "showCouponField": true,
+    "showAddressFields": true,
+    "orderBumpEnabled": false,
+    "header": {
+      "backgroundColor": "#181B4DA4",
+      "elementsColor": "#FFFFFF",
+      "logoPosition": "left"
+    },
+    "announcementBar": {
+      "text": "",
+      "countdownText": "Oferta termina em",
+      "countdownMinutes": 0,
+      "barColor": "#773CBC",
+      "textColor": "#FFFFFF",
+      "countdownColor": "#FFC926"
+    },
+    "miniChat": {
+      "enabled": true,
+      "welcomeMessage": "Olá! Bem-vindo ao nosso checkout. Use o cupom BEMVINDO10 para 10% de desconto!",
+      "coupon": "BEMVINDO10",
+      "showOnConfirmation": false,
+      "confirmationMessage": "Obrigado por sua compra! ✨"
+    },
+    "footer": {
+      "backgroundColor": "#001729",
+      "textColor": "#666666",
+      "showSupport": true,
+      "showWhatsapp": false,
+      "whatsapp": "(99) 99999-9999",
+      "showPhone": false,
+      "phone": "0800 000 0000",
+      "showEmail": false,
+      "email": "suporte@suaempresa.com"
+    },
+    "themeColors": {
+      "primaryButtonBg": "#3FC583",
+      "primaryButtonText": "#FFFFFF",
+      "navigationButtonBg": "#0B1C2A",
+      "navigationButtonText": "#FFFFFF",
+      "titles": "#666666",
+      "descriptions": "#666666",
+      "totalValue": "#44C485"
+    },
+    "paymentSettings": {
+      "allowedMethods": {
+        "card": true,
+        "pix": true,
+        "boleto": true
+      },
+      "allowMultiPayments": false,
+      "multiPaymentsMinCardValue": 50,
+      "installmentsMinParcelValue": 5,
+      "captureIp": true,
+      "checkoutExpiration": {
+        "enabled": true,
+        "durationMinutes": 8,
+        "warningMinutes": 4
+      },
+      "interestRates": {
+        "1": 0,
+        "2": 4.59,
+        "3": 5.99,
+        "4": 7.89,
+        "5": 9.15,
+        "6": 10.99,
+        "7": 12.5,
+        "8": 13.99,
+        "9": 15.25,
+        "10": 16.89,
+        "11": 18.5,
+        "12": 19.99
+      }
+    }
+  },
+  {
+    "id": "9445ffaa-d24d-4460-b774-96db04b237f8",
+    "name": "Configuração 13/08/2025, 01:27:12",
+    "template": "standard",
+    "backgroundColor": "#C8C2E0",
+    "formBackgroundColor": "#FFFFFF",
+    "summaryBackgroundColor": "#FAFAFA",
+    "summaryPosition": "right",
+    "showCouponField": true,
+    "showAddressFields": true,
+    "orderBumpEnabled": false,
+    "header": {
+      "backgroundColor": "#181B4DA4",
+      "elementsColor": "#FFFFFF",
+      "logoPosition": "left"
+    },
+    "announcementBar": {
+      "text": "",
+      "countdownText": "Oferta termina em",
+      "countdownMinutes": 0,
+      "barColor": "#773CBC",
+      "textColor": "#FFFFFF",
+      "countdownColor": "#FFC926"
+    },
+    "miniChat": {
+      "enabled": true,
+      "welcomeMessage": "Olá! Bem-vindo ao nosso checkout. Use o cupom BEMVINDO10 para 10% de desconto!",
+      "coupon": "BEMVINDO10",
+      "showOnConfirmation": false,
+      "confirmationMessage": "Obrigado por sua compra! ✨"
+    },
+    "footer": {
+      "backgroundColor": "#001729",
+      "textColor": "#666666",
+      "showSupport": true,
+      "showWhatsapp": false,
+      "whatsapp": "(99) 99999-9999",
+      "showPhone": false,
+      "phone": "0800 000 0000",
+      "showEmail": false,
+      "email": "suporte@suaempresa.com"
+    },
+    "themeColors": {
+      "primaryButtonBg": "#3FC583",
+      "primaryButtonText": "#FFFFFF",
+      "navigationButtonBg": "#1E88E5",
+      "navigationButtonText": "#FFFFFF",
+      "titles": "#666666",
+      "descriptions": "#666666",
+      "totalValue": "#44C485"
+    },
+    "paymentSettings": {
+      "allowedMethods": {
+        "card": true,
+        "pix": true,
+        "boleto": true
+      },
+      "allowMultiPayments": true,
+      "multiPaymentsMinCardValue": 50,
+      "installmentsMinParcelValue": 5,
+      "captureIp": true,
+      "checkoutExpiration": {
+        "enabled": false,
+        "durationMinutes": 8,
+        "warningMinutes": 4
+      },
+      "interestRates": {
+        "1": 0,
+        "2": 4.59,
+        "3": 5.99,
+        "4": 7.89,
+        "5": 9.15,
+        "6": 10.99,
+        "7": 12.5,
+        "8": 13.99,
+        "9": 15.25,
+        "10": 16.89,
+        "11": 18.5,
+        "12": 19.99
+      }
+    }
+  },
+  {
+    "id": "c8d9f79b-202d-4c40-8c4b-e10ea15112bd",
+    "name": "Configuração 13/08/2025, 02:49:17",
+    "template": "standard",
+    "backgroundColor": "#C8C2E0",
+    "formBackgroundColor": "#FFFFFF",
+    "summaryBackgroundColor": "#FAFAFA",
+    "summaryPosition": "right",
+    "showCouponField": true,
+    "showAddressFields": true,
+    "orderBumpEnabled": false,
+    "header": {
+      "backgroundColor": "#181B4DA4",
+      "elementsColor": "#FFFFFF",
+      "logoPosition": "center"
+    },
+    "announcementBar": {
+      "text": "",
+      "countdownText": "Oferta termina em",
+      "countdownMinutes": 0,
+      "barColor": "#773CBC",
+      "textColor": "#FFFFFF",
+      "countdownColor": "#FFC926"
+    },
+    "miniChat": {
+      "enabled": true,
+      "welcomeMessage": "Olá! Bem-vindo ao nosso checkout. Use o cupom BEMVINDO10 para 10% de desconto!",
+      "coupon": "BEMVINDO10",
+      "showOnConfirmation": false,
+      "confirmationMessage": "Obrigado por sua compra! ✨"
+    },
+    "footer": {
+      "backgroundColor": "#001729",
+      "textColor": "#666666",
+      "showSupport": true,
+      "showWhatsapp": false,
+      "whatsapp": "(99) 99999-9999",
+      "showPhone": false,
+      "phone": "0800 000 0000",
+      "showEmail": false,
+      "email": "suporte@suaempresa.com"
+    },
+    "themeColors": {
+      "primaryButtonBg": "#3FC583",
+      "primaryButtonText": "#FFFFFF",
+      "navigationButtonBg": "#1E88E5",
+      "navigationButtonText": "#FFFFFF",
+      "titles": "#666666",
+      "descriptions": "#666666",
+      "totalValue": "#44C485"
+    },
+    "paymentSettings": {
+      "allowedMethods": {
+        "card": true,
+        "pix": true,
+        "boleto": true
+      },
+      "allowMultiPayments": false,
+      "multiPaymentsMinCardValue": 50,
+      "installmentsMinParcelValue": 5,
+      "captureIp": true,
+      "checkoutExpiration": {
+        "enabled": false,
+        "durationMinutes": 8,
+        "warningMinutes": 4
+      },
+      "interestRates": {
+        "1": 0,
+        "2": 4.59,
+        "3": 5.99,
+        "4": 7.89,
+        "5": 9.15,
+        "6": 10.99,
+        "7": 12.5,
+        "8": 13.99,
+        "9": 15.25,
+        "10": 16.89,
+        "11": 18.5,
+        "12": 19.99
+      }
+    }
+  },
+  {
+    "id": "07eda60f-3bb3-448f-95ff-7c94012bb715",
+    "name": "Configuração 13/08/2025, 03:00:47",
+    "template": "standard",
+    "backgroundColor": "#C8C2E0",
+    "formBackgroundColor": "#FFFFFF",
+    "summaryBackgroundColor": "#FAFAFA",
+    "summaryPosition": "right",
+    "showCouponField": true,
+    "showAddressFields": true,
+    "header": {
+      "backgroundColor": "#000CD1A4",
+      "elementsColor": "#310F0F",
+      "logoPosition": "left"
+    },
+    "announcementBar": {
+      "text": "",
+      "countdownText": "Oferta termina em",
+      "countdownMinutes": 2,
+      "barColor": "#15022C",
+      "textColor": "#FFFFFF",
+      "countdownColor": "#FFC926"
+    },
+    "miniChat": {
+      "enabled": true,
+      "welcomeMessage": "Olá! Bem-vindo ao nosso checkout. Use o cupom BEMVINDO10 para 10% de desconto!",
+      "coupon": "BEMVINDO10",
+      "showOnConfirmation": false,
+      "confirmationMessage": "Obrigado por sua compra! ✨"
+    },
+    "footer": {
+      "backgroundColor": "#008FFF",
+      "textColor": "#F30000",
+      "showSupport": true,
+      "showWhatsapp": true,
+      "whatsapp": "(99) 99999-9999",
+      "showPhone": true,
+      "phone": "0800 000 0000",
+      "showEmail": true,
+      "email": "suporte@suaempresa.com"
+    },
+    "themeColors": {
+      "primaryButtonBg": "#3FC583",
+      "primaryButtonText": "#FFFFFF",
+      "navigationButtonBg": "#1E88E5",
+      "navigationButtonText": "#FFFFFF",
+      "titles": "#666666",
+      "descriptions": "#666666",
+      "totalValue": "#44C485"
+    },
+    "paymentSettings": {
+      "allowedMethods": {
+        "card": true,
+        "pix": true,
+        "boleto": true
+      },
+      "allowMultiPayments": false,
+      "multiPaymentsMinCardValue": 50,
+      "installmentsMinParcelValue": 5,
+      "captureIp": true,
+      "checkoutExpiration": {
+        "enabled": false,
+        "durationMinutes": 8,
+        "warningMinutes": 4
+      },
+      "interestRates": {
+        "1": 0,
+        "2": 4.59,
+        "3": 5.99,
+        "4": 7.89,
+        "5": 9.15,
+        "6": 10.99,
+        "7": 12.5,
+        "8": 13.99,
+        "9": 15.25,
+        "10": 16.89,
+        "11": 18.5,
+        "12": 19.99
+      }
+    }
+  },
+  {
+    "id": "ed740835-0902-469a-8489-df1239a83265",
+    "name": "Configuração 13/08/2025, 03:02:52",
+    "template": "standard",
+    "backgroundColor": "#C8C2E0",
+    "formBackgroundColor": "#FFFFFF",
+    "summaryBackgroundColor": "#FAFAFA",
+    "summaryPosition": "right",
+    "showCouponField": true,
+    "showAddressFields": true,
+    "header": {
+      "backgroundColor": "#181B4DA4",
+      "elementsColor": "#FFFFFF",
+      "logoPosition": "left"
+    },
+    "announcementBar": {
+      "text": "",
+      "countdownText": "Oferta termina em",
+      "countdownMinutes": 0,
+      "barColor": "#773CBC",
+      "textColor": "#FFFFFF",
+      "countdownColor": "#FFC926"
+    },
+    "miniChat": {
+      "enabled": true,
+      "welcomeMessage": "Olá! Bem-vindo ao nosso checkout. Use o cupom BEMVINDO10 para 10% de desconto!",
+      "coupon": "BEMVINDO10",
+      "showOnConfirmation": false,
+      "confirmationMessage": "Obrigado por sua compra! ✨"
+    },
+    "footer": {
+      "backgroundColor": "#001729",
+      "textColor": "#666666",
+      "showSupport": true,
+      "showWhatsapp": false,
+      "whatsapp": "(99) 99999-9999",
+      "showPhone": false,
+      "phone": "0800 000 0000",
+      "showEmail": false,
+      "email": "suporte@suaempresa.com"
+    },
+    "themeColors": {
+      "primaryButtonBg": "#3FC583",
+      "primaryButtonText": "#FFFFFF",
+      "navigationButtonBg": "#1E88E5",
+      "navigationButtonText": "#FFFFFF",
+      "titles": "#666666",
+      "descriptions": "#666666",
+      "totalValue": "#44C485"
+    },
+    "paymentSettings": {
+      "allowedMethods": {
+        "card": true,
+        "pix": true,
+        "boleto": true
+      },
+      "allowMultiPayments": false,
+      "multiPaymentsMinCardValue": 50,
+      "installmentsMinParcelValue": 5,
+      "captureIp": true,
+      "checkoutExpiration": {
+        "enabled": true,
+        "durationMinutes": 1,
+        "warningMinutes": 1
+      },
+      "interestRates": {
+        "1": 0,
+        "2": 4.59,
+        "3": 5.99,
+        "4": 7.89,
+        "5": 9.15,
+        "6": 10.99,
+        "7": 12.5,
+        "8": 13.99,
+        "9": 15.25,
+        "10": 16.89,
+        "11": 18.5,
+        "12": 19.99
+      }
+    }
+  }
+]
