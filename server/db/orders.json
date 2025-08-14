@@ -18,7 +18,7 @@
     "discount": null,
     "customerIdentifier": "danielazevedom@hotmail.com",
     "configId": "8544b06e-4928-4a98-a082-8fec314df201",
-    "status": "Em aguardo",
+    "status": "EXPIRADO",
     "createdAt": "2025-08-14T17:57:20.059Z",
     "paymentDetails": {
       "ipAddress": "::1"

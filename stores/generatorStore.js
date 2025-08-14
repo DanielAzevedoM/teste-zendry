@@ -35,7 +35,7 @@ export const useGeneratorStore = defineStore('generator', {
       countdownColor: '#FFC926',
     },
     miniChat: {
-      enabled: true,
+      enabled: false,
       title: 'Boas-vindas!',
       iconColor: '#1E88E5',
       welcomeMessage: 'Olá! Bem-vindo ao nosso checkout. Use o cupom BEMVINDO10 para 10% de desconto!',
