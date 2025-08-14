@@ -181,7 +181,10 @@ defineExpose({ concluirPagamento, isValid, getPayload });
           <VBtn disabled variant="outlined" prepend-icon="mdi-apple">
             Apple Pay
           </VBtn>
-          <VBtn disabled variant="outlined" prepend-icon="mdi-google-pay">
+          <VBtn disabled variant="outlined">
+            <template #prepend>
+              <img src="@/public/card-brands/google.svg" alt="Google Pay" style="height: 20px;" class="mr-2" />
+            </template>
             Google Pay
           </VBtn>
         </div>
