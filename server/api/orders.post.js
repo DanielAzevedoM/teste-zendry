@@ -25,7 +25,6 @@ export default defineEventHandler(async (event) => {
   orders.push(newOrder);
   await fs.writeFile(dbPath, JSON.stringify(orders, null, 2));
 
-  // Lógica de e-mail modificada
   if (newOrder.customerIdentifier) {
    const customersDbPath = path.join(process.cwd(), 'server', 'db', 'customers.json');
    const configsDbPath = path.join(process.cwd(), 'server', 'db', 'checkout-configs.json');
@@ -58,7 +57,6 @@ export default defineEventHandler(async (event) => {
     let emailSubject = "Finalize sua compra agora!";
     let emailBodyParagraph;
 
-    // Adapta o conteúdo do e-mail com base na configuração de expiração
     if (config?.paymentSettings?.checkoutExpiration?.enabled) {
       const duration = config.paymentSettings.checkoutExpiration.durationMinutes;
       emailBodyParagraph = `
@@ -73,7 +71,6 @@ export default defineEventHandler(async (event) => {
       `;
     }
 
-    // Dispara o e-mail com o conteúdo dinâmico
     await sendEmail({
      to: customerInfoForEmail.email,
      subject: emailSubject,

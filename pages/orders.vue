@@ -4,6 +4,10 @@ import { VRow } from 'vuetify/components';
 import { getOrders, createOrder, updateOrder, deleteOrder } from '~/services/orderService';
 import { getConfigs } from '~/services/configService';
 
+useHead({
+  title: 'Pedidos'
+});
+
 const OrderStatus = {
   PAID: 'PAGO',
   PENDING: 'Em aguardo',
@@ -126,23 +130,27 @@ onMounted(fetchData);
 
 <template>
   <VRow justify="center" class="mt-4">
-    <VCol md="8" sm="11">
+    <VCol md="8" sm="10">
+      
       <div class="d-flex align-center mb-6">
         <VBtn color="primary" @click="openCreateDialog" prepend-icon="mdi-plus">
           Criar Pedido
         </VBtn>
+         <NuxtLink to="/configs">
+          <VBtn class="mx-2" color="teal">Configurações</VBtn>
+        </NuxtLink>
         <NuxtLink to="/">
           <VBtn class="mx-2" color="indigo">Gerador</VBtn>
         </NuxtLink>
         <NuxtLink to="/admin">
           <VBtn class="mx-2" color="green">Painel de Confirmação</VBtn>
         </NuxtLink>
+       
       </div>
 
       <VCard>
         <VCardTitle>Pedidos Criados</VCardTitle>
-        <VDataTable :headers="headers" :items="orders" :loading="isLoading"
-          no-data-text="Nenhum pedido criado ainda.">
+        <VDataTable :headers="headers" :items="orders" :loading="isLoading" no-data-text="Nenhum pedido criado ainda.">
           <template #item.amount="{ item }">
             <span>{{ (item.amount - (item.discount || 0)).toLocaleString('pt-BR', {
               style: 'currency',
@@ -172,13 +180,13 @@ onMounted(fetchData);
           <VCardText class="mt-4">
             <VTextField v-model.number="newOrder.amount" label="Valor do Pedido*" type="number" prefix="R$"
               variant="outlined" class="mb-4" />
-            <VTextField v-model.number="newOrder.discount" label="Desconto (opcional)" type="number"
-              prefix="R$" variant="outlined" class="mb-4" />
-            <VTextField v-model="newOrder.customerIdentifier" label="Email do Cliente (Opcional)"
-              variant="outlined" class="mb-4" type="email" />
+            <VTextField v-model.number="newOrder.discount" label="Desconto (opcional)" type="number" prefix="R$"
+              variant="outlined" class="mb-4" />
+            <VTextField v-model="newOrder.customerIdentifier" label="Email do Cliente (Opcional)" variant="outlined"
+              class="mb-4" type="email" />
             <VSelect v-model="newOrder.configId" :items="configs" item-title="name" item-value="id"
-              label="Configuração de Checkout*" placeholder="Selecione uma configuração"
-              variant="outlined" no-data-text="Nenhuma configuração encontrada." />
+              label="Configuração de Checkout*" placeholder="Selecione uma configuração" variant="outlined"
+              no-data-text="Nenhuma configuração encontrada." />
           </VCardText>
           <VCardActions>
             <VSpacer />

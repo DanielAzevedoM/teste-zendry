@@ -11,7 +11,6 @@ export function detectCardBrand (num) {
   return 'Desconhecida'
 }
 
-// Luhn
 export function luhnValid (num) {
   const s = onlyDigits(num)
   let sum = 0; let alt = false
@@ -24,7 +23,6 @@ export function luhnValid (num) {
   return (sum % 10) === 0 && s.length >= 13
 }
 
-// CPF
 export function isValidCPF (cpf) {
   const s = onlyDigits(cpf)
   if (s.length !== 11) return false

@@ -15,7 +15,7 @@ const {
   header, footer, summaryPosition, announcementBar, miniChat, themeColors
 } = storeToRefs(generatorStore);
 
-// Usamos um valor fixo para o passo atual, para que o resumo sempre apareça
+
 const currentStep = ref(0);
 
 const showSummary = computed(() => currentStep.value < 2);
@@ -29,7 +29,7 @@ const wrapperStyle = computed(() => ({
 
 const headerStyle = computed(() => ({
   backgroundColor: header.value.backgroundColor,
-  color: header.value.elementsColor, // Aplicando a cor dos elementos
+  color: header.value.elementsColor,
 }));
 
 const headerAlignmentClass = computed(() => ({
@@ -70,7 +70,7 @@ const themeStyles = computed(() => {
   };
 });
 
-// Adicionamos dados de exemplo para o OrderSummary funcionar no preview
+
 onMounted(() => {
   paymentStore.setPayment({
     id: 'preview_order',
@@ -94,44 +94,34 @@ onMounted(() => {
         <span v-if="announcementBar.text" class="mr-4" :style="{ color: announcementBar.textColor }">
           {{ announcementBar.text }}
         </span>
-        <CountdownTimer
-          v-if="announcementBar.countdownMinutes > 0"
-          :minutes="announcementBar.countdownMinutes"
-          :countdown-text="announcementBar.countdownText"
-          :countdown-color="announcementBar.countdownColor"
-          :text-color="announcementBar.textColor"
-        />
+        <CountdownTimer v-if="announcementBar.countdownMinutes > 0" :minutes="announcementBar.countdownMinutes"
+          :countdown-text="announcementBar.countdownText" :countdown-color="announcementBar.countdownColor"
+          :text-color="announcementBar.textColor" />
       </VContainer>
     </div>
 
     <VMain class="d-flex align-center justify-center flex-grow-1">
       <VContainer>
         <VRow justify="center">
-          <VCol
-            v-if="showSummary"
-            cols="12" md="5"
-            :class="{ 'order-md-2': !isSummaryOnLeft, 'order-md-1': isSummaryOnLeft }"
-          >
+          <VCol v-if="showSummary" cols="12" md="5"
+            :class="{ 'order-md-2': !isSummaryOnLeft, 'order-md-1': isSummaryOnLeft }">
             <VSheet rounded="lg" class="pa-4" :style="summaryStyle">
               <OrderSummary />
             </VSheet>
           </VCol>
-          <VCol
-            cols="12"
-            :md="showSummary ? 7 : 12"
-            :class="{ 'order-md-1': !isSummaryOnLeft, 'order-md-2': isSummaryOnLeft }"
-          >
+          <VCol cols="12" :md="showSummary ? 7 : 12"
+            :class="{ 'order-md-1': !isSummaryOnLeft, 'order-md-2': isSummaryOnLeft }">
             <VSheet rounded="lg" class="pa-4" :style="formStyle">
-                <h3 class="text-h6 mb-4" :style="{ color: themeStyles['--theme-titles-color'] }">Informações da Conta</h3>
-                <p class="text-body-2 mb-6" :style="{ color: themeStyles['--theme-descriptions-color'] }">
-                    Aqui ficarão os campos do formulário de checkout.
-                </p>
-                <VTextField label="Email" variant="outlined" readonly />
-                <VTextField label="Nome Completo" variant="outlined" readonly class="mt-4" />
-                <div class="d-flex justify-space-between mt-6">
-                    <VBtn variant="tonal" color="secondary">Anterior</VBtn>
-                    <VBtn variant="elevated" class="btn-navigation">Próximo</VBtn>
-                </div>
+              <h3 class="text-h6 mb-4" :style="{ color: themeStyles['--theme-titles-color'] }">Informações da Conta</h3>
+              <p class="text-body-2 mb-6" :style="{ color: themeStyles['--theme-descriptions-color'] }">
+                Aqui ficarão os campos do formulário de checkout.
+              </p>
+              <VTextField label="Email" variant="outlined" readonly />
+              <VTextField label="Nome Completo" variant="outlined" readonly class="mt-4" />
+              <div class="d-flex justify-space-between mt-6">
+                <VBtn variant="tonal" color="secondary">Anterior</VBtn>
+                <VBtn variant="elevated" class="btn-navigation">Próximo</VBtn>
+              </div>
             </VSheet>
           </VCol>
         </VRow>
@@ -140,23 +130,27 @@ onMounted(() => {
 
     <footer class="pa-4 mt-auto text-center" :style="footerStyle">
       <VContainer>
-        <div v-if="footer.showSupport" class="d-flex justify-center flex-column align-center flex-wrap gap-x-6 mb-4" :style="{ color: footer.textColor }">
-          <div v-if="footer.showWhatsapp" class="d-flex align-center"><VIcon icon="mdi-whatsapp" class="mr-2" /><span>{{ footer.whatsapp }}</span></div>
-          <div v-if="footer.showPhone" class="d-flex align-center"><VIcon icon="mdi-phone" class="mr-2" /><span>{{ footer.phone }}</span></div>
-          <div v-if="footer.showEmail" class="d-flex align-center"><VIcon icon="mdi-email-outline" class="mr-2" /><span>{{ footer.email }}</span></div>
+        <div v-if="footer.showSupport" class="d-flex justify-center flex-column align-center flex-wrap gap-x-6 mb-4"
+          :style="{ color: footer.textColor }">
+          <div v-if="footer.showWhatsapp" class="d-flex align-center">
+            <VIcon icon="mdi-whatsapp" class="mr-2" /><span>{{ footer.whatsapp }}</span>
+          </div>
+          <div v-if="footer.showPhone" class="d-flex align-center">
+            <VIcon icon="mdi-phone" class="mr-2" /><span>{{ footer.phone }}</span>
+          </div>
+          <div v-if="footer.showEmail" class="d-flex align-center">
+            <VIcon icon="mdi-email-outline" class="mr-2" /><span>{{ footer.email }}</span>
+          </div>
         </div>
-        <p class="text-caption mb-0">&copy; {{ new Date().getFullYear() }} Sua Empresa. Todos os direitos reservados.</p>
+        <p class="text-caption mb-0">&copy; {{ new Date().getFullYear() }} Sua Empresa. Todos os direitos reservados.
+        </p>
       </VContainer>
     </footer>
 
-    <MiniChatNotification v-if="miniChat.enabled" :message="miniChat.welcomeMessage" :coupon="miniChat.coupon" />
+    <MiniChatNotification v-if="miniChat.enabled" :message="miniChat.welcomeMessage" :coupon="miniChat.coupon"
+      :title="miniChat.title" :icon-color="miniChat.iconColor" :button-bg-color="miniChat.buttonBgColor"
+      :button-text-color="miniChat.buttonTextColor" />
   </VApp>
 </template>
 
-<style scoped>
-/* Garante que o preview não ocupe a tela inteira */
-.v-application {
-  height: 100%;
-  width: 100%;
-}
-</style>
+<style scoped></style>

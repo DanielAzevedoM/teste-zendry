@@ -1,18 +1,21 @@
 <script setup>
 import SettingsCard from '~/components/generator/SettingsCard.vue';
 import CheckoutPreview from '~/components/generator/CheckoutPreview.vue';
+
+useHead({
+  title: 'Gerador'
+});
 </script>
 
 <template>
-  <VContainer fluid class="generator-page">
-
-    <VRow class="main-content-row">
-      <VCol md="4" sm="12" class="settings-col">
-        
+  <VContainer fluid class="generator-page pa-0">
+    <VRow class="main-content-row ma-0">
+      <VCol md="5" cols="12" class="settings-col pa-4">
         <SettingsCard />
       </VCol>
 
-      <VCol md="8" sm="12" class="preview-col">
+      <VCol md="7" cols="12" class="preview-col pa-4">
+       
         <div class="preview-container">
           <div class="preview-content">
             <CheckoutPreview />
@@ -24,71 +27,67 @@ import CheckoutPreview from '~/components/generator/CheckoutPreview.vue';
 </template>
 
 <style scoped>
-/* Trava a página inteira e a organiza em uma coluna flexível */
+/*
+  --- ESTILOS CORRIGIDOS PARA RESPONSIVIDADE ---
+*/
+
 .generator-page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  /* Ocupa 100% da altura da tela */
-  overflow: hidden;
-  /* Esconde o scroll da página principal */
-  padding: 0;
+  /* Garante que a página ocupe no mínimo a altura da tela, mas permite crescer e rolar */
+  min-height: 100vh;
+ 
 }
 
-/* Garante que a área de botões não encolha */
-.header-actions {
-  flex-shrink: 0;
-}
-
-/* Faz a linha principal (com as duas colunas) crescer para ocupar o espaço restante */
-.main-content-row {
-  flex-grow: 1;
-  min-height: 0;
-  /* Correção para flexbox em alguns navegadores */
-}
-
-/* Coluna de configurações agora tem altura definida pelo container e pode scrollar */
-.settings-col {
-  height: 100%;
-  overflow-y: auto;
-  /* Scroll apenas nesta coluna */
-  padding: 0 1rem 1rem 1rem;
-}
-
-/* Centraliza o container do preview na coluna da direita */
+/* Em telas de celular/tablet, as colunas terão altura automática */
+.settings-col,
 .preview-col {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: auto;
 }
 
-/* Container do preview com altura reduzida */
 .preview-container {
   width: 100%;
   max-width: 950px;
-  height: 95%;
-  /* Altura reduzida para 95% da coluna */
-
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  background-color: rgb(228, 228, 228);
-  padding: 12px;
-
-  display: flex;
+  margin: 0 auto; /* Centraliza a prévia */
+  height: 100%;
+  min-height: 720px; /* Garante uma altura mínima para a prévia */
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden; /* Mantém o conteúdo dentro do container arredondado */
 }
 
-/* Conteúdo interno do preview com scroll próprio */
 .preview-content {
   width: 100%;
   height: 100%;
-  overflow-y: auto;
-  /* Scroll apenas dentro do preview */
-  border-radius: 6px;
+  overflow-y: auto; /* Rolagem interna apenas para o conteúdo da prévia */
 }
 
-/* Estilos de scroll discretos (mantidos da solicitação anterior) */
+
+/* --- Estilos para Desktop (telas médias e maiores) --- */
+@media (min-width: 960px) {
+  .generator-page {
+    /* Em desktop, travamos a altura e escondemos a rolagem da página */
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .main-content-row {
+    height: 100%;
+  }
+
+  /* Em desktop, as colunas voltam a ter altura total com rolagem interna */
+  .settings-col,
+  .preview-col {
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .preview-container {
+    height: 95%; /* Mantém o estilo original para desktop */
+  }
+}
+
+/* Estilos da barra de rolagem para um visual mais limpo */
 .settings-col::-webkit-scrollbar,
 .preview-content::-webkit-scrollbar {
   width: 6px;

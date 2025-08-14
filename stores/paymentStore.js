@@ -1,5 +1,3 @@
-// stores/paymentStore.js
-
 import { defineStore } from 'pinia'
 import { findCouponByCode, calcCouponValue } from '~/utils/fakeApi/mock-data'
 
@@ -15,7 +13,7 @@ export const usePaymentStore = defineStore('payment', {
     couponMeta: null,
     coupon: 0,
     
-    // ADICIONADO
+   
     currentStep: 0,
   }),
 
@@ -29,7 +27,7 @@ export const usePaymentStore = defineStore('payment', {
   },
 
   actions: {
-    // ADICIONADO
+
     setCurrentStep (step) {
       this.currentStep = step
     },
@@ -79,7 +77,7 @@ export const usePaymentStore = defineStore('payment', {
       this.couponCode = ''
       this.couponMeta = null
       this.coupon = 0
-      this.currentStep = 0 // Resetar a etapa
+      this.currentStep = 0 
     },
   },
 })

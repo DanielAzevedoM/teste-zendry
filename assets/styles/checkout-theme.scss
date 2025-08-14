@@ -1,56 +1,48 @@
 /* assets/styles/checkout-theme.scss */
 
-/* Aplica as cores em elementos gerais dentro do layout do checkout */
 .checkout-theme-wrapper {
-
-  // Cores Gerais
-  h1, h2, h3, h4, h5, h6, .text-h6, .text-subtitle-1 {
-    color: var(--theme-titles-color, #333);
+  // Estilos para os botões de navegação e primários
+  .btn-navigation {
+    background-color: var(--theme-navigation-button-bg);
+    color: var(--theme-navigation-button-text);
   }
 
-  p, span, div, .text-body-1, .text-body-2, .text-caption, .v-label {
-    color: var(--theme-descriptions-color, #666);
+  // Estilos para os títulos
+  h1, h2, h3, h4, h5, h6,
+  .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6 {
+    color: var(--theme-titles-color);
   }
 
-  // Cor do Valor Total no Resumo
-  .order-summary-total {
-    color: var(--theme-total-value-color, #000) !important;
-    h2, p {
-      color: var(--theme-total-value-color, #000) !important;
+  // Estilos para o valor total
+  .v-col h2 {
+    color: var(--theme-total-value-color);
+  }
+
+  // [INÍCIO DA CORREÇÃO]
+  // Aplicar a cor de descrição APENAS em textos dentro dos blocos de conteúdo principal.
+  // Isso evita que a cor afete o rodapé, alertas e mensagens de erro de formulários.
+  .v-main .v-sheet {
+    p:not(.v-alert p),
+    .text-body-1,
+    .text-body-2,
+    .text-subtitle-1,
+    .text-subtitle-2,
+    .text-caption {
+      color: var(--theme-descriptions-color);
     }
   }
+  // [FIM DA CORREÇÃO]
 
-  // Botão Primário (Concluir Pagamento)
-  .v-btn.bg-success {
-    background-color: var(--theme-primary-button-bg, #00E676) !important;
-    color: var(--theme-primary-button-text, #FFFFFF) !important;
-    .v-btn__content {
-      color: var(--theme-primary-button-text, #FFFFFF) !important;
-    }
-  }
-  
-  // Botão de Navegação (Próximo)
-  .v-btn.btn-navigation {
-    background-color: var(--theme-navigation-button-bg, #1E88E5) !important;
-    color: var(--theme-navigation-button-text, #FFFFFF) !important;
-    .v-btn__content {
-      color: var(--theme-navigation-button-text, #FFFFFF) !important;
-    }
-  }
-
-  // Stepper de Etapas
-  .app-stepper {
-    .stepper-steps-active {
-      .stepper-title {
-        color: var(--theme-active-step-color, #000) !important;
-        font-weight: 500 !important;
-      }
-      .v-avatar {
-        background-color: var(--theme-step-tag-bg, #333) !important;
-        h5 {
-          color: var(--theme-step-tag-text, #FFF) !important;
-        }
-      }
-    }
+  // Garante que o texto do rodapé use sua cor específica
+  footer p,
+  footer span,
+  footer .v-icon {
+    color: inherit !important;
   }
 }
+
+// Garante que as mensagens de erro do Vuetify sempre usem a cor de erro
+.v-input.v-input--error .v-messages__message {
+  color: rgb(var(--v-theme-error)) !important;
+}
+

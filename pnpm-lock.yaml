@@ -14,9 +14,6 @@ importers:
       '@pinia/nuxt':
         specifier: ^0.11.2
         version: 0.11.2(magicast@0.3.5)(pinia@3.0.3(typescript@5.9.2)(vue@3.5.18(typescript@5.9.2)))
-      '@tabler/icons-vue':
-        specifier: ^3.34.1
-        version: 3.34.1(vue@3.5.18(typescript@5.9.2))
       country-state-city:
         specifier: ^3.2.1
         version: 3.2.1
@@ -1217,14 +1214,6 @@ packages:
 
   '@speed-highlight/core@1.2.7':
     resolution: {integrity: sha512-0dxmVj4gxg3Jg879kvFS/msl4s9F3T9UXC1InxgOf7t5NvcPD97u/WTA5vL/IxWHMn7qSxBozqrnnE2wvl1m8g==}
-
-  '@tabler/icons-vue@3.34.1':
-    resolution: {integrity: sha512-bUJHhZYnhSo7pNueHWn9z2Lx9F2GY54a6D4Fd6HP0n0G5h9fTeq4mYSV2Ptcxr/gMetx7IC1PF5SA+tOhAdZmA==}
-    peerDependencies:
-      vue: '>=3.0.1'
-
-  '@tabler/icons@3.34.1':
-    resolution: {integrity: sha512-9gTnUvd7Fd/DmQgr3MKY+oJLa1RfNsQo8c/ir3TJAWghOuZXodbtbVp0QBY2DxWuuvrSZFys0HEbv1CoiI5y6A==}
 
   '@tybys/wasm-util@0.10.0':
     resolution: {integrity: sha512-VyyPYFlOMNylG45GoAe0xDoLwWuowvf92F9kySqzYh8vmYm7D2u4iUJKa1tOUpS70Ku13ASrOkS4ScXFsTaCNQ==}
@@ -5228,13 +5217,6 @@ snapshots:
   '@sindresorhus/merge-streams@2.3.0': {}
 
   '@speed-highlight/core@1.2.7': {}
-
-  '@tabler/icons-vue@3.34.1(vue@3.5.18(typescript@5.9.2))':
-    dependencies:
-      '@tabler/icons': 3.34.1
-      vue: 3.5.18(typescript@5.9.2)
-
-  '@tabler/icons@3.34.1': {}
 
   '@tybys/wasm-util@0.10.0':
     dependencies:

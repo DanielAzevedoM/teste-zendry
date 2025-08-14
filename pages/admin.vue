@@ -4,6 +4,10 @@ import { useNuxtApp } from '#app';
 import { getOrders } from '~/services/orderService';
 import { confirmPayment } from '~/services/adminService';
 
+useHead({
+  title: 'Painel de confirmação'
+});
+
 const orders = ref([]);
 const isLoading = ref(true);
 const { $ws } = useNuxtApp();
@@ -53,6 +57,9 @@ onMounted(fetchOrders);
           <VBtn @click="fetchOrders" icon="mdi-refresh" variant="tonal" />
         </div>
         <div class="d-flex align-center mb-6">
+          <NuxtLink to="/configs">
+          <VBtn class="mx-2" color="teal">Configurações</VBtn>
+        </NuxtLink>
           <NuxtLink to="/">
             <VBtn class="mx-2" color="indigo">Gerador</VBtn>
           </NuxtLink>

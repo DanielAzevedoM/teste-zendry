@@ -14,3 +14,8 @@ export async function getConfigs() {
 export async function getConfig(id) {
   return await $fetch(`/api/configs/${id}`);
 }
+
+// Adicionar esta nova função
+export async function deleteConfig(id) {
+  return await $fetch(`/api/configs/${id}`, { method: 'DELETE' });
+}
