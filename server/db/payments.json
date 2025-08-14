@@ -421,5 +421,34 @@
     "status": "PENDENTE",
     "createdAt": "2025-08-14T17:13:00.759Z",
     "details": {}
+  },
+  {
+    "id": "txn_fbbb2ae1-fb6e-4dad-b0a0-dccd30e9cb0a",
+    "orderId": "ord_5e195f23-63b8-4763-b73e-f8931f27d1d4",
+    "amount": 180,
+    "method": "pix",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-14T17:24:54.177Z",
+    "details": {}
+  },
+  {
+    "id": "txn_f320db07-e24f-471b-ae6f-3f6858a2efda",
+    "orderId": "ord_54f91369-0d4a-4354-90fa-de824e5040ad",
+    "amount": 100,
+    "method": "pix",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-14T17:38:31.403Z",
+    "details": {}
+  },
+  {
+    "id": "txn_c3a305c1-7d63-4f36-ac68-964b31c2bf49",
+    "orderId": "ord_54f91369-0d4a-4354-90fa-de824e5040ad",
+    "amount": 100,
+    "method": "boleto",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-14T17:38:31.427Z",
+    "details": {
+      "email": "danielazevedom@hotmail.com"
+    }
   }
 ]

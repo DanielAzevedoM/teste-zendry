@@ -1,10 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useDisplay } from 'vuetify'; // Importa o composable de display
 import { getConfigs, deleteConfig } from '~/services/configService';
 
 useHead({
   title: 'Configurações de checkout'
 });
+
+// Lógica para responsividade
+const { mdAndUp } = useDisplay();
 
 const configs = ref([]);
 const isLoading = ref(true);
@@ -54,58 +58,36 @@ async function performDelete() {
   closeDeleteDialog();
 }
 
-function copyToClipboard(text, message) {
-  navigator.clipboard.writeText(text);
-  alert(message);
-}
-
 onMounted(fetchData);
 </script>
 
 <template>
   <VContainer>
     <VRow justify="center" class="mt-8">
-      <VCol md="10" sm="12">
+      <VCol cols="12" lg="10">
         <div class="d-flex justify-space-between align-center mb-6">
-          <h1 class="text-h4">Configurações de Checkout</h1>
+          <h1 class="text-h4">Configurações</h1>
           <VBtn @click="fetchData" icon="mdi-refresh" variant="tonal" title="Atualizar Lista" />
         </div>
-        <div class="d-flex align-center mb-6">
+        <div class="d-flex flex-wrap align-center mb-6" style="gap: 0.5rem;">
           <NuxtLink to="/">
-            <VBtn class="mr-2" color="indigo">Gerador</VBtn>
+            <VBtn color="indigo">Gerador</VBtn>
           </NuxtLink>
           <NuxtLink to="/orders">
-            <VBtn class="mx-2" color="primary">Pedidos</VBtn>
+            <VBtn color="primary">Pedidos</VBtn>
           </NuxtLink>
           <NuxtLink to="/admin">
-            <VBtn class="mx-2" color="green">Painel de Confirmação</VBtn>
+            <VBtn color="green">Painel de Confirmação</VBtn>
           </NuxtLink>
         </div>
 
-        <VCard class="mt-6">
+        <VCard v-if="mdAndUp" class="mt-6">
           <VCardTitle>Configurações Salvas</VCardTitle>
-          <VDataTable 
-            :headers="headers" 
-            :items="configs" 
-            :loading="isLoading"
-            no-data-text="Nenhuma configuração encontrada."
-          >
+          <VDataTable :headers="headers" :items="configs" :loading="isLoading"
+            no-data-text="Nenhuma configuração encontrada.">
             <template #item.actions="{ item }">
               <div class="d-flex gap-2 justify-end">
-                <!-- <VBtn 
-                  color="info" 
-                  variant="tonal" 
-                  size="small" 
-                  @click="copyToClipboard(item.id, 'ID da configuração copiado!')"
-                >
-                  Copiar ID
-                </VBtn> -->
-                <VBtn 
-                  color="error" 
-                  variant="tonal" 
-                  size="small" 
-                  @click="openDeleteDialog(item)"
-                >
+                <VBtn color="error" variant="tonal" size="small" @click="openDeleteDialog(item)">
                   Excluir
                 </VBtn>
               </div>
@@ -113,12 +95,38 @@ onMounted(fetchData);
           </VDataTable>
         </VCard>
 
+        <div v-else>
+          <h2 class="text-h5 mb-4 mt-6">Configurações Salvas</h2>
+          <VProgressLinear v-if="isLoading" indeterminate />
+          <div v-if="!configs.length && !isLoading" class="text-center text-grey">
+             Nenhuma configuração encontrada.
+          </div>
+          <VRow>
+            <VCol v-for="item in configs" :key="item.id" cols="12">
+              <VCard>
+                <VCardTitle class="text-subtitle-1">{{ item.name }}</VCardTitle>
+                <VCardText>
+                  <div><strong>ID:</strong> {{ item.id }}</div>
+                  <div><strong>Template:</strong> {{ item.template }}</div>
+                </VCardText>
+                <VDivider />
+                <VCardActions class="justify-end">
+                  <VBtn color="error" variant="tonal" size="small" @click="openDeleteDialog(item)">
+                    Excluir
+                  </VBtn>
+                </VCardActions>
+              </VCard>
+            </VCol>
+          </VRow>
+        </div>
+
+
         <VDialog v-model="isDeleteDialogOpen" max-width="500px" persistent>
           <VCard>
             <VCardTitle class="headline">Confirmar Exclusão</VCardTitle>
             <VCardText>
-              Você tem certeza que deseja excluir a configuração 
-              <strong>{{ configToDelete?.name }}</strong> (ID: {{ configToDelete?.id }})? 
+              Você tem certeza que deseja excluir a configuração
+              <strong>{{ configToDelete?.name }}</strong> (ID: {{ configToDelete?.id }})?
               <br><br>
               Esta ação não pode ser desfeita.
             </VCardText>

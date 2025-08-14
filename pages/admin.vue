@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useDisplay } from 'vuetify'; // Importa o composable de display
 import { useNuxtApp } from '#app';
 import { getOrders } from '~/services/orderService';
 import { confirmPayment } from '~/services/adminService';
@@ -7,6 +8,9 @@ import { confirmPayment } from '~/services/adminService';
 useHead({
   title: 'Painel de confirmação'
 });
+
+// Lógica para responsividade
+const { mdAndUp } = useDisplay();
 
 const orders = ref([]);
 const isLoading = ref(true);
@@ -51,24 +55,24 @@ onMounted(fetchOrders);
 <template>
   <VContainer>
     <VRow justify="center" class="mt-8">
-      <VCol md="10" sm="12">
+      <VCol cols="12" lg="10">
         <div class="d-flex justify-space-between align-center mb-6">
           <h1 class="text-h4">Painel de Confirmação</h1>
           <VBtn @click="fetchOrders" icon="mdi-refresh" variant="tonal" />
         </div>
-        <div class="d-flex align-center mb-6">
+        <div class="d-flex flex-wrap align-center mb-6" style="gap: 0.5rem;">
           <NuxtLink to="/configs">
-          <VBtn class="mx-2" color="teal">Configurações</VBtn>
-        </NuxtLink>
+            <VBtn color="teal">Configurações</VBtn>
+          </NuxtLink>
           <NuxtLink to="/">
-            <VBtn class="mx-2" color="indigo">Gerador</VBtn>
+            <VBtn color="indigo">Gerador</VBtn>
           </NuxtLink>
           <NuxtLink to="/orders">
-            <VBtn class="mx-2" color="green">Pedidos</VBtn>
+            <VBtn color="primary">Pedidos</VBtn>
           </NuxtLink>
         </div>
 
-        <VCard class="mt-6">
+        <VCard v-if="mdAndUp" class="mt-6">
           <VCardTitle>Pedidos Pendentes</VCardTitle>
           <VDataTable :headers="[
             { title: 'ID do Pedido', key: 'id' },
@@ -92,6 +96,31 @@ onMounted(fetchOrders);
             </template>
           </VDataTable>
         </VCard>
+
+        <div v-else>
+          <h2 class="text-h5 mb-4 mt-6">Pedidos Pendentes</h2>
+          <VProgressLinear v-if="isLoading" indeterminate />
+          <div v-if="!pendingOrders.length && !isLoading" class="text-center text-grey">
+            Nenhum pedido pendente.
+          </div>
+          <VRow>
+            <VCol v-for="item in pendingOrders" :key="item.id" cols="12">
+              <VCard>
+                 <VCardText>
+                    <div><strong>ID:</strong> {{ item.id }}</div>
+                    <div><strong>Valor:</strong> {{ (item.amount - (item.discount || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}</div>
+                    <div><strong>Criado em:</strong> {{ new Date(item.createdAt).toLocaleString('pt-BR') }}</div>
+                 </VCardText>
+                 <VDivider />
+                 <VCardActions>
+                    <VBtn color="success" variant="elevated" block @click="handleConfirmPayment(item.id)">
+                      Confirmar Pagamento
+                    </VBtn>
+                 </VCardActions>
+              </VCard>
+            </VCol>
+          </VRow>
+        </div>
       </VCol>
     </VRow>
   </VContainer>
