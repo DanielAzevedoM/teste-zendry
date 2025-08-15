@@ -5,11 +5,23 @@
     "discount": 30,
     "customerIdentifier": "danielazevedom@hotmail.com",
     "configId": "176db305-7247-4b02-a7c0-d4913e0fffb1",
-    "status": "Em aguardo",
+    "status": "EXPIRADO",
     "createdAt": "2025-08-15T12:33:56.343Z",
     "paymentDetails": {
       "ipAddress": "::1"
     },
     "customerName": "Daniel Azevêdo"
+  },
+  {
+    "id": "ord_93aeea91-cb5d-49c7-a5b2-7154c29d3234",
+    "amount": 200,
+    "discount": null,
+    "customerIdentifier": "danielazevedom@hotmail.com",
+    "configId": "83aeaabb-d9f1-41cc-8330-66c5f7bbd8a8",
+    "status": "Em aguardo",
+    "createdAt": "2025-08-15T13:25:46.404Z",
+    "paymentDetails": {
+      "ipAddress": "::1"
+    }
   }
 ]

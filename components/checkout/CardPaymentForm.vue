@@ -60,7 +60,7 @@ defineExpose({ validate: () => formCardRef.value.validate() });
 </script>
 
 <template>
-  <VForm ref="formCardRef" v-model="isCardFormValid" validate-on="blur">
+  <VForm ref="formCardRef" v-model="isCardFormValid" validate-on="input">
     <v-text-field v-model="card.holderName" label="Nome no cartão*" :rules="[rules.required, rules.cardHolder]" variant="outlined" class="mb-3" />
     <v-text-field v-model="card.number" label="Número do cartão*" :rules="[rules.required, rules.cardNumber, rules.cardNumberLength]" v-mask="'card'" variant="outlined" class="mb-3">
       <template #prepend-inner>
