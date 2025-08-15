@@ -581,5 +581,25 @@
     "status": "PENDENTE",
     "createdAt": "2025-08-15T12:18:28.937Z",
     "details": {}
+  },
+  {
+    "id": "txn_13fa1766-bc55-4eba-8f13-056a16f52e82",
+    "orderId": "ord_cea9253a-789a-424a-8d0e-5603a8cefb2f",
+    "amount": 120,
+    "method": "pix",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-15T12:34:47.108Z",
+    "details": {}
+  },
+  {
+    "id": "txn_583f5ce5-40d8-4bdb-8ab1-0694234e6a0e",
+    "orderId": "ord_cea9253a-789a-424a-8d0e-5603a8cefb2f",
+    "amount": 150,
+    "method": "boleto",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-15T12:34:47.121Z",
+    "details": {
+      "email": ""
+    }
   }
 ]

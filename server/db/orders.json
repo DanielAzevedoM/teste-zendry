@@ -1,79 +1,15 @@
 [
   {
-    "id": "ord_46fafd63-29f4-4a81-97c5-0bb658ebc0a9",
-    "amount": 200,
-    "discount": null,
-    "customerIdentifier": "",
-    "configId": "8544b06e-4928-4a98-a082-8fec314df201",
-    "status": "EXPIRADO",
-    "createdAt": "2025-08-15T11:02:22.711Z",
-    "paymentDetails": {
-      "ipAddress": "::1"
-    }
-  },
-  {
-    "id": "ord_a93463f5-362a-4b0a-990d-ae0e39974dc0",
-    "amount": 200,
-    "discount": null,
-    "customerIdentifier": "danielazevedom@hotmail.com",
-    "configId": "8544b06e-4928-4a98-a082-8fec314df201",
-    "status": "PAGO",
-    "createdAt": "2025-08-15T11:22:01.471Z",
-    "paymentDetails": {
-      "ipAddress": "::1"
-    },
-    "customerName": "Daniel Azevêdo"
-  },
-  {
-    "id": "ord_7612f49d-1b0c-40ba-98ad-d01d06a774ca",
-    "amount": 200,
-    "discount": null,
-    "customerIdentifier": "danielazevedom@hotmail.com",
-    "configId": "8544b06e-4928-4a98-a082-8fec314df201",
-    "status": "PAGO",
-    "createdAt": "2025-08-15T11:26:32.261Z",
-    "paymentDetails": {
-      "ipAddress": "::1"
-    },
-    "customerName": "Daniel Azevêdo"
-  },
-  {
-    "id": "ord_5211985c-f2f0-4478-b1b7-5ceaa369df07",
+    "id": "ord_cea9253a-789a-424a-8d0e-5603a8cefb2f",
     "amount": 300,
-    "discount": null,
+    "discount": 30,
     "customerIdentifier": "danielazevedom@hotmail.com",
-    "configId": "8544b06e-4928-4a98-a082-8fec314df201",
-    "status": "PAGO",
-    "createdAt": "2025-08-15T11:31:16.668Z",
+    "configId": "176db305-7247-4b02-a7c0-d4913e0fffb1",
+    "status": "Em aguardo",
+    "createdAt": "2025-08-15T12:33:56.343Z",
     "paymentDetails": {
       "ipAddress": "::1"
     },
     "customerName": "Daniel Azevêdo"
-  },
-  {
-    "id": "ord_3a133df0-865e-48fa-a575-cfd35533187a",
-    "amount": 300,
-    "discount": null,
-    "customerIdentifier": "danielazevedom@hotmail.com",
-    "configId": "88721323-a82f-4885-9bf0-42a8c89bdfe2",
-    "status": "PAGO",
-    "createdAt": "2025-08-15T11:34:34.354Z",
-    "paymentDetails": {
-      "ipAddress": "::1"
-    },
-    "customerName": "Daniel Azevêdo"
-  },
-  {
-    "id": "ord_51d10db0-2a46-4e50-a877-3f3035ee4e7d",
-    "amount": 200,
-    "discount": null,
-    "customerIdentifier": "danielazevedom27@gmail.com",
-    "configId": "8544b06e-4928-4a98-a082-8fec314df201",
-    "status": "PAGO",
-    "createdAt": "2025-08-15T12:14:54.409Z",
-    "paymentDetails": {
-      "ipAddress": "::1"
-    },
-    "customerName": "Daniel A A Marques"
   }
 ]
