@@ -10,7 +10,20 @@ useHead({
 <template>
   <VContainer fluid class="generator-page pa-0">
     <VRow class="main-content-row ma-0">
+      
+
       <VCol md="5" cols="12" class="settings-col pa-4">
+         <div class="d-flex justify-center flex-wrap align-center mb-6" style="gap: 0.5rem;">
+         <NuxtLink to="/configs">
+        <VBtn class="mx-2" color="teal">Configurações</VBtn>
+      </NuxtLink>
+      <NuxtLink to="/orders">
+        <VBtn class="mx-2" color="indigo">Ver Pedidos</VBtn>
+      </NuxtLink>
+      <NuxtLink to="/admin">
+        <VBtn class="mx-2" color="green">Painel de Confirmação</VBtn>
+      </NuxtLink>
+        </div>
         <SettingsCard />
       </VCol>
 

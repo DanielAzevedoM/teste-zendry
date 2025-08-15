@@ -81,17 +81,6 @@ async function saveConfiguration() {
 </script>
 
 <template>
-  <div class="pb-4 pt-4 text-center header-actions">
-    <NuxtLink to="/configs">
-      <VBtn class="mx-2" color="teal">Configurações</VBtn>
-    </NuxtLink>
-    <NuxtLink to="/orders">
-      <VBtn class="mx-2" color="indigo">Ver Pedidos</VBtn>
-    </NuxtLink>
-    <NuxtLink to="/admin">
-      <VBtn class="mx-2" color="green">Painel de Confirmação</VBtn>
-    </NuxtLink>
-  </div>
   <VCard class="mx-auto" max-width="600" title="Gerador de Configuração de Checkout"
     subtitle="Crie e salve modelos de checkout">
     <VTabs v-model="currentTab" bg-color="transparent" grow class="mt-4">

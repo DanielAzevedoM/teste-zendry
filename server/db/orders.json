@@ -23,5 +23,17 @@
     "paymentDetails": {
       "ipAddress": "::1"
     }
+  },
+  {
+    "id": "ord_c0d6f7b4-bc4d-4ce3-b950-fea55317a290",
+    "amount": 200,
+    "discount": null,
+    "customerIdentifier": "",
+    "configId": "83aeaabb-d9f1-41cc-8330-66c5f7bbd8a8",
+    "status": "Em aguardo",
+    "createdAt": "2025-08-15T13:30:18.395Z",
+    "paymentDetails": {
+      "ipAddress": "::1"
+    }
   }
 ]
