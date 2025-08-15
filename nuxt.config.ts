@@ -3,6 +3,7 @@ import { resolve } from 'path'
 import { fileURLToPath } from 'node:url'
 
 export default defineNuxtConfig({
+   devtools: { enabled: false },
   alias: {
     '@': resolve(__dirname, './'),
     '@core': resolve(__dirname, './@core'),

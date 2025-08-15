@@ -1007,23 +1007,6 @@ async function errorHandler(error, event) {
   // H3 will handle fallback
 }
 
-const script = `
-if (!window.__NUXT_DEVTOOLS_TIME_METRIC__) {
-  Object.defineProperty(window, '__NUXT_DEVTOOLS_TIME_METRIC__', {
-    value: {},
-    enumerable: false,
-    configurable: true,
-  })
-}
-window.__NUXT_DEVTOOLS_TIME_METRIC__.appInit = Date.now()
-`;
-
-const _aOVGLn8vnD0BT6b6L8tWXfvYYR0RsuCeFKNzgmXv8 = (function(nitro) {
-  nitro.hooks.hook("render:html", (htmlContext) => {
-    htmlContext.head.push(`<script>${script}<\/script>`);
-  });
-});
-
 const rootDir = "/home/daniel/Imagens/teste-zendry";
 
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
@@ -1223,8 +1206,7 @@ const _Nn0o1fiJmpsnkOYaCK6r0zz4Flhu_3BARaN5BulmJQ = defineNitroPlugin(() => {
 });
 
 const plugins = [
-  _aOVGLn8vnD0BT6b6L8tWXfvYYR0RsuCeFKNzgmXv8,
-_M7U8f0cw7EWgLMYOuYO2ZnSB9ITYCVPp8l70ulwYvk,
+  _M7U8f0cw7EWgLMYOuYO2ZnSB9ITYCVPp8l70ulwYvk,
 _Nn0o1fiJmpsnkOYaCK6r0zz4Flhu_3BARaN5BulmJQ
 ];
 

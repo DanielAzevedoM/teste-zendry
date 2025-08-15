@@ -49,9 +49,6 @@ declare global {
   const effect: typeof import('vue')['effect']
   const effectScope: typeof import('vue')['effectScope']
   const extendRef: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['extendRef']
-  const formatCEP: typeof import('../../utils/mask')['formatCEP']
-  const formatCPF: typeof import('../../utils/mask')['formatCPF']
-  const formatExpiry: typeof import('../../utils/mask')['formatExpiry']
   const getAppManifest: typeof import('../../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
@@ -191,6 +188,8 @@ declare global {
   const useCached: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useCached']
   const useCardBrand: typeof import('../../composables/useCardBrand')['useCardBrand']
   const useCheckout: typeof import('../../composables/useCheckout')['useCheckout']
+  const useCheckoutExpiration: typeof import('../../composables/useCheckoutExpiration')['useCheckoutExpiration']
+  const useCheckoutSetup: typeof import('../../composables/useCheckoutSetup')['useCheckoutSetup']
   const useClipboard: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useClipboard']
   const useClipboardItems: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useClipboardItems']
   const useCloned: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useCloned']
@@ -273,7 +272,6 @@ declare global {
   const useNow: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useNow']
   const useNuxtApp: typeof import('../../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/nuxt')['useNuxtApp']
   const useNuxtData: typeof import('../../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']
-  const useNuxtDevTools: typeof import('../../node_modules/.pnpm/@nuxt+devtools@2.6.2_vite@7.0.6_@types+node@24.2.0_jiti@2.5.1_sass-embedded@1.90.0_sass_73de8c5497544f98cfee7e70d0b7ba9a/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools')['useNuxtDevTools']
   const useObjectUrl: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useObjectUrl']
   const useOffsetPagination: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useOffsetPagination']
   const useOnline: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useOnline']
@@ -474,9 +472,6 @@ declare module 'vue' {
     readonly effect: UnwrapRef<typeof import('vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extendRef: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['extendRef']>
-    readonly formatCEP: UnwrapRef<typeof import('../../utils/mask')['formatCEP']>
-    readonly formatCPF: UnwrapRef<typeof import('../../utils/mask')['formatCPF']>
-    readonly formatExpiry: UnwrapRef<typeof import('../../utils/mask')['formatExpiry']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
@@ -616,6 +611,8 @@ declare module 'vue' {
     readonly useCached: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useCached']>
     readonly useCardBrand: UnwrapRef<typeof import('../../composables/useCardBrand')['useCardBrand']>
     readonly useCheckout: UnwrapRef<typeof import('../../composables/useCheckout')['useCheckout']>
+    readonly useCheckoutExpiration: UnwrapRef<typeof import('../../composables/useCheckoutExpiration')['useCheckoutExpiration']>
+    readonly useCheckoutSetup: UnwrapRef<typeof import('../../composables/useCheckoutSetup')['useCheckoutSetup']>
     readonly useClipboard: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useClipboard']>
     readonly useClipboardItems: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useClipboardItems']>
     readonly useCloned: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useCloned']>
@@ -698,7 +695,6 @@ declare module 'vue' {
     readonly useNow: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useNow']>
     readonly useNuxtApp: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/nuxt')['useNuxtApp']>
     readonly useNuxtData: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']>
-    readonly useNuxtDevTools: UnwrapRef<typeof import('../../node_modules/.pnpm/@nuxt+devtools@2.6.2_vite@7.0.6_@types+node@24.2.0_jiti@2.5.1_sass-embedded@1.90.0_sass_73de8c5497544f98cfee7e70d0b7ba9a/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools')['useNuxtDevTools']>
     readonly useObjectUrl: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useObjectUrl']>
     readonly useOffsetPagination: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useOffsetPagination']>
     readonly useOnline: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useOnline']>

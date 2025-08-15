@@ -1,26 +1,33 @@
+// composables/useCheckout.js
 import { reactive, computed, onMounted, onBeforeUnmount, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { usePaymentStore } from '@/stores/paymentStore';
 import { useGeneratorStore } from '~/stores/generatorStore';
-import { getOrder, expireOrder } from '~/services/orderService';
-import { getConfig } from '~/services/configService';
-import { getCustomer } from '~/services/customerService';
+import { useCheckoutSetup } from './useCheckoutSetup';
+import { useCheckoutExpiration } from './useCheckoutExpiration';
 
 export function useCheckout() {
   const { $ws } = useNuxtApp();
-  const route = useRoute();
-  const router = useRouter();
   const paymentStore = usePaymentStore();
   const generatorStore = useGeneratorStore();
 
   const purchase = ref(null);
   const { currentStep } = storeToRefs(paymentStore);
-  const { paymentSettings } = storeToRefs(generatorStore);
-
   const stepAccountValid = ref(false);
   const stepAddressValid = ref(false);
   const stepPaymentValid = ref(false);
+
+  const formData = reactive({
+    name: '', email: '', cpf: '', phone: '',
+    address: { city: '', state: '', country: '', zip: '', neighborhood: '', complement: '', street: '' },
+    checkbox: false,
+  });
+
+  const { setupCheckout: performSetup } = useCheckoutSetup(formData);
+  const { showExpirationWarning, warningCountdownSeconds, startExpirationTimer, stopExpirationTimer } = useCheckoutExpiration();
+  
+  const status = ref('idle');
+  const processing = ref(false);
 
   const steps = computed(() => {
     const baseSteps = [
@@ -61,126 +68,23 @@ export function useCheckout() {
     }
   }
 
-  const formData = reactive({
-    name: '',
-    email: '',
-    cpf: '',
-    phone: '',
-    address: { city: '', state: '', country: '', zip: '', neighborhood: '', complement: '', street: '' },
-    checkbox: false,
-  });
-
-  const payment = ref(null);
-  const method = ref('card');
-  const status = ref('idle');
-  const processing = ref(false);
-  const serverData = reactive({});
-
-  const showExpirationWarning = ref(false);
-  const warningCountdownSeconds = ref(0);
-  let expirationInterval = null;
-  const isPurchaseCompleted = ref(false);
-
-  async function handleExpiration(redirect = true) {
-    isPurchaseCompleted.value = true;
-    clearInterval(expirationInterval);
-    expirationInterval = null;
-    try {
-      await expireOrder(route.params.id);
-      if (redirect) {
-        alert("Seu tempo para concluir a compra expirou. Redirecionando...");
-        router.push('/orders');
+  async function setup(orderId) {
+      const { isReady, order, config, error } = await performSetup(orderId);
+      if (isReady) {
+          startExpirationTimer(order, config);
       }
-    } catch (error) {
-      console.error("Erro ao expirar o pedido:", error);
-    }
-  }
-  
-  async function setupCheckout(orderId) {
-    if (!orderId) throw new Error("ID do pedido não fornecido.");
-
-    const order = await getOrder(orderId);
-    if (!order) throw new Error('Pedido não encontrado.');
-
-    if (order.status === 'PAGO') {
-      alert("Este pedido já foi pago. Redirecionando...");
-      router.push('/orders');
-      return { isReady: false };
-    }
-
-    if (order.status === 'EXPIRADO') {
-      alert("Este pedido já está expirado. Redirecionando...");
-      router.push('/orders');
-      return { isReady: false };
-    }
-
-    const config = await getConfig(order.configId);
-    generatorStore.setConfig(config);
-
-    if (paymentSettings.value.checkoutExpiration.enabled) {
-      const createdAt = new Date(order.createdAt).getTime();
-      const durationMs = paymentSettings.value.checkoutExpiration.durationMinutes * 60 * 1000;
-      const expirationTime = createdAt + durationMs;
-
-      if (Date.now() >= expirationTime) {
-        await handleExpiration();
-        return { isReady: false, error: 'Este pedido expirou.' };
-      }
-
-      let remainingSeconds = Math.floor((expirationTime - Date.now()) / 1000);
-      const warningSecondsThreshold = paymentSettings.value.checkoutExpiration.warningMinutes * 60;
-      
-      let hasShownWarning = false;
-      expirationInterval = setInterval(() => {
-        if (isPurchaseCompleted.value) {
-          clearInterval(expirationInterval);
-          return;
-        }
-        remainingSeconds--;
-        if (remainingSeconds > 0 && remainingSeconds <= warningSecondsThreshold && !hasShownWarning) {
-          warningCountdownSeconds.value = remainingSeconds;
-          showExpirationWarning.value = true;
-          hasShownWarning = true;
-        }
-        if (remainingSeconds <= 0) {
-          handleExpiration();
-        }
-      }, 1000);
-    }
-
-    const paymentData = { id: order.id, amount: order.amount, discount: order.discount, paymentDetails: order.paymentDetails, customerIdentifier: order.customerIdentifier };
-    payment.value = paymentData;
-    paymentStore.setPayment(paymentData);
-
-    const customer = await getCustomer(order.customerIdentifier);
-    if (customer) {
-      formData.name = customer.name || '';
-      formData.email = customer.email || '';
-      formData.cpf = customer.cpf || '';
-      formData.phone = customer.phone || '';
-      if (customer.address) {
-        formData.address = { ...formData.address, ...customer.address };
-      }
-    } else if (order.customerIdentifier) {
-      formData.email = order.customerIdentifier;
-    }
-    
-    return { isReady: true };
+      return { isReady, error };
   }
 
   async function processPayment(paymentPayloads) {
-    if (!payment.value?.id || !paymentPayloads || paymentPayloads.length === 0) return;
+    const payment = paymentStore.payment;
+    if (!payment?.id || !paymentPayloads || paymentPayloads.length === 0) return;
 
-    isPurchaseCompleted.value = true;
-    clearInterval(expirationInterval);
-    expirationInterval = null;
-
+    stopExpirationTimer();
     processing.value = true;
     status.value = 'processing';
     paymentStore.setStatus('processing');
-
-    method.value = paymentPayloads.length > 1 ? 'multi' : paymentPayloads[0].method;
-    paymentStore.setMethod(method.value);
+    paymentStore.setMethod(paymentPayloads.length > 1 ? 'multi' : paymentPayloads[0].method);
 
     try {
       const transactionResponses = [];
@@ -188,7 +92,7 @@ export function useCheckout() {
         const res = await $fetch('/api/payments', {
           method: 'POST',
           body: {
-            orderId: payment.value.id,
+            orderId: payment.id,
             amount: payload.amount,
             method: payload.method,
             details: payload.details,
@@ -199,13 +103,11 @@ export function useCheckout() {
       }
 
       const firstServerData = transactionResponses[0]?.serverData || {};
-      Object.keys(serverData).forEach(k => delete serverData[k]);
-      Object.assign(serverData, firstServerData);
       paymentStore.mergeServerData(firstServerData);
 
       purchase.value = {
         user: { ...formData },
-        payment: { ...payment.value, total: paymentStore.total, couponDiscount: paymentStore.coupon, ipAddress: payment.value.paymentDetails?.ipAddress },
+        payment: { ...payment, total: paymentStore.total, couponDiscount: paymentStore.coupon, ipAddress: payment.paymentDetails?.ipAddress },
         transactions: transactionResponses
       };
 
@@ -217,19 +119,14 @@ export function useCheckout() {
       console.error("Erro ao processar pagamento:", e);
       alert(e.data?.statusMessage || 'Ocorreu um erro ao processar seu pagamento.');
       processing.value = false;
-      isPurchaseCompleted.value = false; // Permite tentar novamente
     }
   }
 
   function onStatus(msg) {
-    if (!payment.value || msg?.id !== payment.value.id) return;
+    if (!paymentStore.payment || msg?.id !== paymentStore.payment.id) return;
     status.value = msg.status || status.value;
     paymentStore.setStatus(status.value);
     paymentStore.setLastEvent(msg);
-
-    if (purchase.value) {
-      purchase.value = { ...purchase.value };
-    }
 
     const finalStep = generatorStore.finalStepIndex;
     if (['approved', 'failed', 'expired', 'canceled'].includes(status.value)) {
@@ -245,16 +142,14 @@ export function useCheckout() {
 
   onBeforeUnmount(() => {
     $ws?.off?.('payment:status', onStatus);
-    clearInterval(expirationInterval);
+    stopExpirationTimer();
   });
 
   return {
     currentStep, steps, isCurrentStepValid,
     stepAccountValid, stepAddressValid, stepPaymentValid, next, prev, setStep,
-    formData,
-    payment, method, status, processing, serverData,
-    setupCheckout, processPayment,
-    purchase,
-    showExpirationWarning, warningCountdownSeconds, isPurchaseCompleted
+    formData, purchase,
+    processPayment, status, processing,
+    setupCheckout: setup, showExpirationWarning, warningCountdownSeconds
   };
 }

@@ -32,14 +32,14 @@ export { computedAsync, asyncComputed, computedEager, eagerComputed, computedInj
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useCardBrand } from '../composables/useCardBrand';
 export { useCheckout } from '../composables/useCheckout';
+export { useCheckoutExpiration } from '../composables/useCheckoutExpiration';
+export { useCheckoutSetup } from '../composables/useCheckoutSetup';
 export { useCoupon } from '../composables/useCoupon';
 export { useInstallments } from '../composables/useInstallments';
 export { usePayment } from '../composables/usePayment';
 export { onlyDigits, detectCardBrand, luhnValid, isValidCPF } from '../utils/cardBrand';
-export { formatCPF, formatCEP, formatExpiry } from '../utils/mask';
 export { useAuthStore } from '../stores/authStore';
 export { useGeneratorStore } from '../stores/generatorStore';
 export { usePaymentStore } from '../stores/paymentStore';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/.pnpm/@pinia+nuxt@0.11.2_magicast@0.3.5_pinia@3.0.3_typescript@5.9.2_vue@3.5.18_typescript@5.9.2__/node_modules/@pinia/nuxt/dist/runtime/composables';
-export { useNuxtDevTools } from '../node_modules/.pnpm/@nuxt+devtools@2.6.2_vite@7.0.6_@types+node@24.2.0_jiti@2.5.1_sass-embedded@1.90.0_sass_73de8c5497544f98cfee7e70d0b7ba9a/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';
 export { definePageMeta } from '../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/pages/runtime/composables';
