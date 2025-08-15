@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { sendEmail } from '@/server/utils/sendEmail.js';
 
 export default defineEventHandler(async (event) => {
   const paymentData = await readBody(event);
@@ -35,7 +36,6 @@ export default defineEventHandler(async (event) => {
       return createError({ statusCode: 403, statusMessage: `Este pedido já está com status '${order.status}'.` });
     }
 
-
     if (buyer && buyer.email) {
       orders[orderIndex].customerIdentifier = buyer.email;
       if (buyer.name) {
@@ -62,18 +62,53 @@ export default defineEventHandler(async (event) => {
       return {
         ok: true,
         qrCode: qrCodeData,
-        qrCodeImage: qrCodeImageUrl, 
+        qrCodeImage: qrCodeImageUrl,
         expiresAt: Date.now() + 5 * 60 * 1000
       };
-
     }
 
     if (method === 'boleto') {
-      return {
-        ok: true,
-        boletoUrl: "https://www.google.com",
-        linhaDigitavel: "34191.79001 01043.510047 91020.101014 1 93250000150000"
+      const boletoData = {
+        boletoUrl: "https://www.example.com/boleto/gerado", // URL Fictícia
+        linhaDigitavel: "34191.79001 01043.510047 91020.101014 1 93250000150000" // Linha Fictícia
       };
+      
+      // LÓGICA DE ENVIO DE E-MAIL DO BOLETO CORRIGIDA E MAIS ROBUSTA
+      const recipientEmail = details?.email || buyer?.email;
+
+      if (recipientEmail) {
+        console.log(`[EMAIL BOLETO] Preparando para enviar boleto para: ${recipientEmail}`);
+        try {
+            const customerName = buyer.name ? buyer.name.split(' ')[0] : 'Cliente';
+            await sendEmail({
+                to: recipientEmail,
+                subject: `Seu boleto para o pedido #${orderId} foi gerado`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                        <h3>Olá ${customerName},</h3>
+                        <p>Seu boleto para o pedido <strong>${orderId}</strong> no valor de <strong>${amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> foi gerado com sucesso!</p>
+                        <p>Para pagar, você pode usar a linha digitável abaixo ou clicar no botão para visualizar e imprimir o boleto.</p>
+                        <hr style="margin: 20px 0;">
+                        <p style="font-family: monospace; font-size: 14px; background: #f4f4f4; padding: 10px; border-radius: 4px; text-align: center;">${boletoData.linhaDigitavel}</p>
+                        <div style="text-align: center; margin: 20px 0;">
+                          <a href="${boletoData.boletoUrl}" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #3FC583; text-decoration: none; border-radius: 5px;">
+                              Visualizar e Imprimir Boleto
+                          </a>
+                        </div>
+                        <p>Lembre-se que a confirmação do pagamento pode levar até 2 dias úteis.</p>
+                        <br>
+                        <p><em>Equipe Zendry</em></p>
+                    </div>
+                `
+            });
+        } catch (emailError) {
+            console.error(`[ERRO] Falha ao enviar o e-mail do boleto para o pedido ${orderId}. E-mail: ${recipientEmail}`, emailError);
+        }
+      } else {
+        console.warn(`[AVISO] O e-mail do boleto para o pedido ${orderId} não foi enviado porque nenhum e-mail de destinatário foi encontrado.`);
+      }
+
+      return { ok: true, ...boletoData };
     }
 
     return { ok: true, transactionId: newPayment.id };

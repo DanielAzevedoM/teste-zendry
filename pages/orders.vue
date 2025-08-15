@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useDisplay } from 'vuetify'; // Importa o composable de display
+import { useDisplay } from 'vuetify'; 
 import { VRow } from 'vuetify/components';
 import { getOrders, createOrder, updateOrder, deleteOrder } from '~/services/orderService';
 import { getConfigs } from '~/services/configService';
@@ -9,7 +9,7 @@ useHead({
   title: 'Pedidos'
 });
 
-// Lógica para responsividade
+
 const { mdAndUp } = useDisplay();
 
 const OrderStatus = {
@@ -141,6 +141,11 @@ onMounted(fetchData);
   <VContainer>
     <VRow justify="center" class="mt-4">
       <VCol cols="12" lg="10">
+
+        <div class="d-flex justify-space-between align-center mb-6">
+          <h1 class="text-h4">Pedidos</h1>
+          <VBtn @click="fetchData" icon="mdi-refresh" variant="tonal" title="Atualizar Lista" />
+        </div>
         <div class="d-flex flex-wrap align-center mb-6" style="gap: 0.5rem;">
           <VBtn color="primary" @click="openCreateDialog" prepend-icon="mdi-plus">
             Criar Pedido
@@ -171,7 +176,7 @@ onMounted(fetchData);
               <span>{{ (item.amount - (item.discount || 0)).toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
-                }) }}</span>
+              }) }}</span>
             </template>
             <template #item.status="{ item }">
               <VChip :color="statusColor(item.status)" small>{{ item.status }}</VChip>
@@ -210,9 +215,9 @@ onMounted(fetchData);
                 </VCardText>
                 <VDivider />
                 <VCardActions class="justify-end gap-2">
-                    <VBtn color="info" variant="tonal" size="small" @click="generateCheckoutLink(item.id)" :disabled="item.status !== OrderStatus.PENDING">Link</VBtn>
-                    <VBtn color="primary" variant="tonal" size="small" @click="openEditDialog(item)" :disabled="item.status !== OrderStatus.PENDING">Editar</VBtn>
-                    <VBtn color="error" variant="tonal" size="small" @click="openDeleteDialog(item)">Excluir</VBtn>
+                  <VBtn color="info" variant="tonal" size="small" @click="generateCheckoutLink(item.id)" :disabled="item.status !== OrderStatus.PENDING">Link</VBtn>
+                  <VBtn color="primary" variant="tonal" size="small" @click="openEditDialog(item)" :disabled="item.status !== OrderStatus.PENDING">Editar</VBtn>
+                  <VBtn color="error" variant="tonal" size="small" @click="openDeleteDialog(item)">Excluir</VBtn>
                 </VCardActions>
               </VCard>
             </VCol>

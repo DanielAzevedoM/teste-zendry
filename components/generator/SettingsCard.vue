@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'; // Adicionado 'computed'
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useGeneratorStore } from '~/stores/generatorStore';
 import {
@@ -19,10 +19,12 @@ const {
   summaryPosition, showCouponField, showAddressFields,
   announcementBar, miniChat, themeColors,
   paymentSettings,
-  scripts
+  scripts,
+  // ADICIONADO: Referência para a newsletter
+  newsletter
 } = storeToRefs(generatorStore);
 
-// NOVA LÓGICA: Conta quantos métodos de pagamento estão habilitados.
+
 const enabledMethodsCount = computed(() => {
   return Object.values(paymentSettings.value.allowedMethods).filter(v => v === true).length;
 });
@@ -34,6 +36,7 @@ function onLogoChange(file) {
 async function saveConfiguration() {
   isLoading.value = true;
 
+  // MODIFICADO: Incluindo a configuração da newsletter no objeto a ser salvo
   const configData = {
     name: `Configuração ${new Date().toLocaleString('pt-BR')}`,
     template: template.value,
@@ -50,6 +53,7 @@ async function saveConfiguration() {
     },
     announcementBar: announcementBar.value,
     miniChat: miniChat.value,
+    newsletter: newsletter.value,
     footer: footer.value,
     themeColors: themeColors.value,
     paymentSettings: paymentSettings.value,
@@ -134,8 +138,8 @@ async function saveConfiguration() {
         <p class="text-h6 mt-6 mb-4">Configurações</p>
         <VSheet border rounded class="pa-4">
           <VLabel class="mb-1">Logotipo</VLabel>
-          <VFileInput label="Arraste a imagem ou clique aqui" variant="outlined"
-            accept="image/png, image/jpeg" @update:model-value="onLogoChange" :loading="isLogoLoading" />
+          <VFileInput label="Arraste a imagem ou clique aqui" variant="outlined" accept="image/png, image/jpeg"
+            @update:model-value="onLogoChange" :loading="isLogoLoading" />
           <p class="text-caption mt-1">Formatos .jpg e .png com menos de 500kb. Sugestão de tamanho: 300 x 90
             px.</p>
           <VLabel class="mt-4">Posicionamento</VLabel>
@@ -230,11 +234,11 @@ async function saveConfiguration() {
             <VTextField v-if="footer.showWhatsapp" v-model="footer.whatsapp" label="Número do WhatsApp"
               variant="outlined" density="compact" class="ml-8 mb-2" placeholder="(99) 99999-9999" />
             <VCheckbox v-model="footer.showPhone" label="Mostrar telefone/celular" color="success" />
-            <VTextField v-if="footer.showPhone" v-model="footer.phone" label="Número do Telefone"
-              variant="outlined" density="compact" class="ml-8 mb-2" placeholder="0800 000 0000" />
+            <VTextField v-if="footer.showPhone" v-model="footer.phone" label="Número do Telefone" variant="outlined"
+              density="compact" class="ml-8 mb-2" placeholder="0800 000 0000" />
             <VCheckbox v-model="footer.showEmail" label="Mostrar e-mail" color="success" />
-            <VTextField v-if="footer.showEmail" v-model="footer.email" label="Endereço de E-mail"
-              variant="outlined" density="compact" class="ml-8 mb-2" placeholder="suporte@suaempresa.com" />
+            <VTextField v-if="footer.showEmail" v-model="footer.email" label="Endereço de E-mail" variant="outlined"
+              density="compact" class="ml-8 mb-2" placeholder="suporte@suaempresa.com" />
           </div>
         </VSheet>
       </VWindowItem>
@@ -248,8 +252,8 @@ async function saveConfiguration() {
             Útil para produtos digitais que não exigem entrega.
           </p>
           <VSwitch v-model="showAddressFields"
-            :label="showAddressFields ? 'Seção de endereço ativada' : 'Seção de endereço desativada'"
-            class="mt-2" color="success" />
+            :label="showAddressFields ? 'Seção de endereço ativada' : 'Seção de endereço desativada'" class="mt-2"
+            color="success" />
         </VSheet>
       </VWindowItem>
 
@@ -423,7 +427,20 @@ async function saveConfiguration() {
             </div>
           </div>
         </VSheet>
-      </VWindowItem>
+        <p class="text-h6 mt-6 mb-4">Popup de Newsletter</p>
+        <VSheet border rounded class="pa-4">
+          <p class="text-caption">Exibe um popup na página de confirmação de pagamento para capturar leads.</p>
+          <VSwitch v-model="newsletter.enabled" :label="newsletter.enabled ? 'Ativado' : 'Desativado'" class="mt-2" color="success" />
+          <div v-if="newsletter.enabled">
+            <VLabel class="mt-4 mb-1">Título do Popup</VLabel>
+            <VTextField v-model="newsletter.title" variant="outlined" density="compact" placeholder="Não perca nossas novidades!" />
+            <VLabel class="mt-4 mb-1">Subtítulo (mensagem)</VLabel>
+            <VTextarea v-model="newsletter.subtitle" variant="outlined" rows="3" placeholder="Assine nossa newsletter e receba ofertas exclusivas." />
+            <VLabel class="mt-4 mb-1">Texto do Botão</VLabel>
+            <VTextField v-model="newsletter.buttonText" variant="outlined" density="compact" placeholder="Assinar" />
+          </div>
+        </VSheet>
+        </VWindowItem>
 
       <VWindowItem class="pa-4">
         <div class="d-flex justify-space-between align-center mb-4">
@@ -460,8 +477,8 @@ async function saveConfiguration() {
 
         <VSheet border rounded class="pa-4 mb-6">
           <p class="text-subtitle-1 mb-2">Pagamento Dividido (Juros)</p>
-          <VTextField v-model.number="paymentSettings.installmentsMinParcelValue"
-            label="Valor mínimo por parcela" type="number" prefix="R$" variant="outlined" />
+          <VTextField v-model.number="paymentSettings.installmentsMinParcelValue" label="Valor mínimo por parcela"
+            type="number" prefix="R$" variant="outlined" />
           <p class="text-caption mt-2">O sistema de parcelamento só exibirá opções cuja parcela seja maior ou
             igual a este valor.</p>
         </VSheet>

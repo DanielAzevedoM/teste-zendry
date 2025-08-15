@@ -2451,11 +2451,45 @@ const payments_post = defineEventHandler(async (event) => {
       };
     }
     if (method === "boleto") {
-      return {
-        ok: true,
-        boletoUrl: "https://www.google.com",
+      const boletoData = {
+        boletoUrl: "https://www.example.com/boleto/gerado",
+        // URL Fictícia
         linhaDigitavel: "34191.79001 01043.510047 91020.101014 1 93250000150000"
+        // Linha Fictícia
       };
+      const recipientEmail = (details == null ? void 0 : details.email) || (buyer == null ? void 0 : buyer.email);
+      if (recipientEmail) {
+        console.log(`[EMAIL BOLETO] Preparando para enviar boleto para: ${recipientEmail}`);
+        try {
+          const customerName = buyer.name ? buyer.name.split(" ")[0] : "Cliente";
+          await sendEmail({
+            to: recipientEmail,
+            subject: `Seu boleto para o pedido #${orderId} foi gerado`,
+            html: `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                        <h3>Ol\xE1 ${customerName},</h3>
+                        <p>Seu boleto para o pedido <strong>${orderId}</strong> no valor de <strong>${amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong> foi gerado com sucesso!</p>
+                        <p>Para pagar, voc\xEA pode usar a linha digit\xE1vel abaixo ou clicar no bot\xE3o para visualizar e imprimir o boleto.</p>
+                        <hr style="margin: 20px 0;">
+                        <p style="font-family: monospace; font-size: 14px; background: #f4f4f4; padding: 10px; border-radius: 4px; text-align: center;">${boletoData.linhaDigitavel}</p>
+                        <div style="text-align: center; margin: 20px 0;">
+                          <a href="${boletoData.boletoUrl}" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #3FC583; text-decoration: none; border-radius: 5px;">
+                              Visualizar e Imprimir Boleto
+                          </a>
+                        </div>
+                        <p>Lembre-se que a confirma\xE7\xE3o do pagamento pode levar at\xE9 2 dias \xFAteis.</p>
+                        <br>
+                        <p><em>Equipe Zendry</em></p>
+                    </div>
+                `
+          });
+        } catch (emailError) {
+          console.error(`[ERRO] Falha ao enviar o e-mail do boleto para o pedido ${orderId}. E-mail: ${recipientEmail}`, emailError);
+        }
+      } else {
+        console.warn(`[AVISO] O e-mail do boleto para o pedido ${orderId} n\xE3o foi enviado porque nenhum e-mail de destinat\xE1rio foi encontrado.`);
+      }
+      return { ok: true, ...boletoData };
     }
     return { ok: true, transactionId: newPayment.id };
   } catch (error) {

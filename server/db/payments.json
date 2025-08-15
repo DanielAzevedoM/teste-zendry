@@ -539,5 +539,47 @@
     "details": {
       "email": ""
     }
+  },
+  {
+    "id": "txn_4aac9bfc-d7f3-4498-b8c2-3b839986db1f",
+    "orderId": "ord_3a133df0-865e-48fa-a575-cfd35533187a",
+    "amount": 300,
+    "method": "boleto",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-15T12:03:52.737Z",
+    "details": {
+      "email": ""
+    }
+  },
+  {
+    "id": "txn_19742844-f32d-4a4d-aa3a-4262aaf213de",
+    "orderId": "ord_3a133df0-865e-48fa-a575-cfd35533187a",
+    "amount": 300,
+    "method": "boleto",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-15T12:10:00.805Z",
+    "details": {
+      "email": ""
+    }
+  },
+  {
+    "id": "txn_7c29818a-b773-43fa-b313-3a8f92d1d1f3",
+    "orderId": "ord_3a133df0-865e-48fa-a575-cfd35533187a",
+    "amount": 300,
+    "method": "boleto",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-15T12:14:07.195Z",
+    "details": {
+      "email": ""
+    }
+  },
+  {
+    "id": "txn_14e015d4-f586-4a0f-b894-f5294632ba52",
+    "orderId": "ord_51d10db0-2a46-4e50-a877-3f3035ee4e7d",
+    "amount": 200,
+    "method": "pix",
+    "status": "PENDENTE",
+    "createdAt": "2025-08-15T12:18:28.937Z",
+    "details": {}
   }
 ]

@@ -10,8 +10,9 @@ import AccountForm from '@/components/checkout/AccountForm.vue';
 import AddressForm from '@/components/checkout/AddressForm.vue';
 import OrderSummary from '@/components/checkout/OrderSummary.vue';
 import PaymentMethod from '@/components/checkout/PaymentMethod.vue';
-import PaymentConfirmation from '~/components/checkout/PaymentConfirmation.vue';
+import PaymentConfirmation from '@/components/checkout/PaymentConfirmation.vue';
 import CountdownTimer from '@/components/checkout/CountdownTimer.vue';
+import NewsletterPopup from '@/components/checkout/NewsletterPopup.vue';
 
 definePageMeta({ layout: false });
 
@@ -19,11 +20,12 @@ const route = useRoute();
 const generatorStore = useGeneratorStore();
 const paymentStore = usePaymentStore();
 
-const { scripts } = storeToRefs(generatorStore);
+const { scripts, newsletter: newsletterSettings } = storeToRefs(generatorStore);
 
 const isLoading = ref(true);
 const isConfigLoaded = ref(false);
 const errorMessage = ref('');
+const showNewsletterPopup = ref(false);
 
 const {
   steps, isCurrentStepValid,
@@ -41,6 +43,15 @@ const layoutName = computed(() => generatorStore.activeLayoutComponent);
 const paymentStepIndex = computed(() => generatorStore.showAddressFields ? 2 : 1);
 const finalStepIndex = computed(() => steps.value.length - 1);
 
+watchEffect(() => {
+  // Mostra o popup se a funcionalidade estiver ativa e o usuário estiver na etapa final
+  if (newsletterSettings.value.enabled && currentStep.value === finalStepIndex.value && (status.value === 'approved' || status.value === 'processing')) {
+    // Adiciona um pequeno delay para o usuário ver a tela de confirmação antes do popup
+    setTimeout(() => {
+        showNewsletterPopup.value = true;
+    }, 2500);
+  }
+});
 
 onMounted(async () => {
   try {
@@ -80,13 +91,9 @@ watchEffect(() => {
     if (metaTags.ogImage) {
       metaToInject.push({ property: 'og:image', content: metaTags.ogImage });
     }
-
-    // --- INÍCIO DA CORREÇÃO ---
-    // Adiciona a meta tag 'keywords' se ela existir na configuração
     if (metaTags.keywords) {
       metaToInject.push({ name: 'keywords', content: metaTags.keywords });
     }
-    // --- FIM DA CORREÇÃO ---
   }
 
   if (gtmId) {
@@ -103,7 +110,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     });
   }
 
-
   if (fbPixelId) {
     scriptsToInject.push({
       children: `!function(f,b,e,v,n,t,s)
@@ -118,7 +124,7 @@ fbq('init', '${fbPixelId}');
 fbq('track', 'PageView');`
     });
     noscriptsToInject.push({
-      children: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${fbPixelId}&ev=PageView&noscript=1" />`
+      children: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${fbPixelId}&ev=PageView&noscript=1"/>`
     });
   }
 
@@ -163,6 +169,8 @@ async function concluirPagamento() {
         </VCardActions>
       </VCard>
     </VDialog>
+
+    <NewsletterPopup v-if="showNewsletterPopup" @close="showNewsletterPopup = false" />
 
     <div v-if="isLoading" class="d-flex justify-center align-center fill-height" style="min-height: 100vh;">
       <VProgressCircular indeterminate color="primary" />

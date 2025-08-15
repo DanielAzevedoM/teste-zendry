@@ -18,6 +18,7 @@ interface _GlobalComponents {
     'CheckoutCardPaymentForm': typeof import("../components/checkout/CardPaymentForm.vue")['default']
     'CheckoutCountdownTimer': typeof import("../components/checkout/CountdownTimer.vue")['default']
     'CheckoutMiniChatNotification': typeof import("../components/checkout/MiniChatNotification.vue")['default']
+    'CheckoutNewsletterPopup': typeof import("../components/checkout/NewsletterPopup.vue")['default']
     'CheckoutOrderSummary': typeof import("../components/checkout/OrderSummary.vue")['default']
     'CheckoutPaymentConfirmation': typeof import("../components/checkout/PaymentConfirmation.vue")['default']
     'CheckoutPaymentMethod': typeof import("../components/checkout/PaymentMethod.vue")['default']
@@ -54,6 +55,7 @@ interface _GlobalComponents {
     'LazyCheckoutCardPaymentForm': LazyComponent<typeof import("../components/checkout/CardPaymentForm.vue")['default']>
     'LazyCheckoutCountdownTimer': LazyComponent<typeof import("../components/checkout/CountdownTimer.vue")['default']>
     'LazyCheckoutMiniChatNotification': LazyComponent<typeof import("../components/checkout/MiniChatNotification.vue")['default']>
+    'LazyCheckoutNewsletterPopup': LazyComponent<typeof import("../components/checkout/NewsletterPopup.vue")['default']>
     'LazyCheckoutOrderSummary': LazyComponent<typeof import("../components/checkout/OrderSummary.vue")['default']>
     'LazyCheckoutPaymentConfirmation': LazyComponent<typeof import("../components/checkout/PaymentConfirmation.vue")['default']>
     'LazyCheckoutPaymentMethod': LazyComponent<typeof import("../components/checkout/PaymentMethod.vue")['default']>
@@ -96,6 +98,7 @@ export const CheckoutBoletoPaymentForm: typeof import("../components/checkout/Bo
 export const CheckoutCardPaymentForm: typeof import("../components/checkout/CardPaymentForm.vue")['default']
 export const CheckoutCountdownTimer: typeof import("../components/checkout/CountdownTimer.vue")['default']
 export const CheckoutMiniChatNotification: typeof import("../components/checkout/MiniChatNotification.vue")['default']
+export const CheckoutNewsletterPopup: typeof import("../components/checkout/NewsletterPopup.vue")['default']
 export const CheckoutOrderSummary: typeof import("../components/checkout/OrderSummary.vue")['default']
 export const CheckoutPaymentConfirmation: typeof import("../components/checkout/PaymentConfirmation.vue")['default']
 export const CheckoutPaymentMethod: typeof import("../components/checkout/PaymentMethod.vue")['default']
@@ -132,6 +135,7 @@ export const LazyCheckoutBoletoPaymentForm: LazyComponent<typeof import("../comp
 export const LazyCheckoutCardPaymentForm: LazyComponent<typeof import("../components/checkout/CardPaymentForm.vue")['default']>
 export const LazyCheckoutCountdownTimer: LazyComponent<typeof import("../components/checkout/CountdownTimer.vue")['default']>
 export const LazyCheckoutMiniChatNotification: LazyComponent<typeof import("../components/checkout/MiniChatNotification.vue")['default']>
+export const LazyCheckoutNewsletterPopup: LazyComponent<typeof import("../components/checkout/NewsletterPopup.vue")['default']>
 export const LazyCheckoutOrderSummary: LazyComponent<typeof import("../components/checkout/OrderSummary.vue")['default']>
 export const LazyCheckoutPaymentConfirmation: LazyComponent<typeof import("../components/checkout/PaymentConfirmation.vue")['default']>
 export const LazyCheckoutPaymentMethod: LazyComponent<typeof import("../components/checkout/PaymentMethod.vue")['default']>

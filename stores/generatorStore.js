@@ -46,6 +46,13 @@ export const useGeneratorStore = defineStore('generator', {
       buttonBgColor: '#1E88E5',
       buttonTextColor: '#FFFFFF',
     },
+  
+    newsletter: {
+      enabled: false,
+      title: 'Não perca nossas novidades!',
+      subtitle: 'Assine nossa newsletter e receba ofertas exclusivas.',
+      buttonText: 'Assinar',
+    },
     footer: {
       backgroundColor: '#001729',
       textColor: '#666666',
@@ -77,7 +84,6 @@ export const useGeneratorStore = defineStore('generator', {
         '7': 12.50, '8': 13.99, '9': 15.25, '10': 16.89, '11': 18.50, '12': 19.99
       },
     },
-
     scripts: {
       googleTagManagerId: '',
       facebookPixelId: '',
@@ -187,6 +193,10 @@ export const useGeneratorStore = defineStore('generator', {
       }
       if (config.miniChat) {
         this.miniChat = { ...this.miniChat, ...config.miniChat };
+      }
+
+      if (config.newsletter) {
+          this.newsletter = { ...this.newsletter, ...config.newsletter };
       }
       if (config.footer) {
         this.footer = { ...this.footer, ...config.footer };
