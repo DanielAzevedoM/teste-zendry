@@ -245,6 +245,7 @@ declare global {
   const useId: typeof import('vue')['useId']
   const useIdle: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useIdle']
   const useInfiniteScroll: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useInfiniteScroll']
+  const useInstallments: typeof import('../../composables/useInstallments')['useInstallments']
   const useIntersectionObserver: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useIntersectionObserver']
   const useInterval: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useInterval']
   const useIntervalFn: typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useIntervalFn']
@@ -669,6 +670,7 @@ declare module 'vue' {
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useIdle: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useIdle']>
     readonly useInfiniteScroll: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useInfiniteScroll']>
+    readonly useInstallments: UnwrapRef<typeof import('../../composables/useInstallments')['useInstallments']>
     readonly useIntersectionObserver: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useIntersectionObserver']>
     readonly useInterval: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useInterval']>
     readonly useIntervalFn: UnwrapRef<typeof import('../../node_modules/.pnpm/@vueuse+core@13.6.0_vue@3.5.18_typescript@5.9.2_/node_modules/@vueuse/core')['useIntervalFn']>

@@ -13,11 +13,13 @@ type HydrationStrategies = {
 type LazyComponent<T> = (T & DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }>)
 interface _GlobalComponents {
       'CheckoutAccountForm': typeof import("../components/checkout/AccountForm.vue")['default']
+    'CheckoutAddressForm': typeof import("../components/checkout/AddressForm.vue")['default']
     'CheckoutCountdownTimer': typeof import("../components/checkout/CountdownTimer.vue")['default']
     'CheckoutMiniChatNotification': typeof import("../components/checkout/MiniChatNotification.vue")['default']
     'CheckoutOrderSummary': typeof import("../components/checkout/OrderSummary.vue")['default']
     'CheckoutPaymentConfirmation': typeof import("../components/checkout/PaymentConfirmation.vue")['default']
     'CheckoutPaymentMethod': typeof import("../components/checkout/PaymentMethod.vue")['default']
+    'GeneratorCheckoutPreview': typeof import("../components/generator/CheckoutPreview.vue")['default']
     'GeneratorSettingsCard': typeof import("../components/generator/SettingsCard.vue")['default']
     'NuxtWelcome': typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/welcome.vue")['default']
     'NuxtLayout': typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/nuxt-layout")['default']
@@ -44,11 +46,13 @@ interface _GlobalComponents {
     'NuxtIsland': typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/nuxt-island")['default']
     'NuxtRouteAnnouncer': typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/server-placeholder")['default']
       'LazyCheckoutAccountForm': LazyComponent<typeof import("../components/checkout/AccountForm.vue")['default']>
+    'LazyCheckoutAddressForm': LazyComponent<typeof import("../components/checkout/AddressForm.vue")['default']>
     'LazyCheckoutCountdownTimer': LazyComponent<typeof import("../components/checkout/CountdownTimer.vue")['default']>
     'LazyCheckoutMiniChatNotification': LazyComponent<typeof import("../components/checkout/MiniChatNotification.vue")['default']>
     'LazyCheckoutOrderSummary': LazyComponent<typeof import("../components/checkout/OrderSummary.vue")['default']>
     'LazyCheckoutPaymentConfirmation': LazyComponent<typeof import("../components/checkout/PaymentConfirmation.vue")['default']>
     'LazyCheckoutPaymentMethod': LazyComponent<typeof import("../components/checkout/PaymentMethod.vue")['default']>
+    'LazyGeneratorCheckoutPreview': LazyComponent<typeof import("../components/generator/CheckoutPreview.vue")['default']>
     'LazyGeneratorSettingsCard': LazyComponent<typeof import("../components/generator/SettingsCard.vue")['default']>
     'LazyNuxtWelcome': LazyComponent<typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/welcome.vue")['default']>
     'LazyNuxtLayout': LazyComponent<typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
@@ -81,11 +85,13 @@ declare module 'vue' {
 }
 
 export const CheckoutAccountForm: typeof import("../components/checkout/AccountForm.vue")['default']
+export const CheckoutAddressForm: typeof import("../components/checkout/AddressForm.vue")['default']
 export const CheckoutCountdownTimer: typeof import("../components/checkout/CountdownTimer.vue")['default']
 export const CheckoutMiniChatNotification: typeof import("../components/checkout/MiniChatNotification.vue")['default']
 export const CheckoutOrderSummary: typeof import("../components/checkout/OrderSummary.vue")['default']
 export const CheckoutPaymentConfirmation: typeof import("../components/checkout/PaymentConfirmation.vue")['default']
 export const CheckoutPaymentMethod: typeof import("../components/checkout/PaymentMethod.vue")['default']
+export const GeneratorCheckoutPreview: typeof import("../components/generator/CheckoutPreview.vue")['default']
 export const GeneratorSettingsCard: typeof import("../components/generator/SettingsCard.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/nuxt-layout")['default']
@@ -112,11 +118,13 @@ export const Body: typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blob
 export const NuxtIsland: typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/nuxt-island")['default']
 export const NuxtRouteAnnouncer: typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/server-placeholder")['default']
 export const LazyCheckoutAccountForm: LazyComponent<typeof import("../components/checkout/AccountForm.vue")['default']>
+export const LazyCheckoutAddressForm: LazyComponent<typeof import("../components/checkout/AddressForm.vue")['default']>
 export const LazyCheckoutCountdownTimer: LazyComponent<typeof import("../components/checkout/CountdownTimer.vue")['default']>
 export const LazyCheckoutMiniChatNotification: LazyComponent<typeof import("../components/checkout/MiniChatNotification.vue")['default']>
 export const LazyCheckoutOrderSummary: LazyComponent<typeof import("../components/checkout/OrderSummary.vue")['default']>
 export const LazyCheckoutPaymentConfirmation: LazyComponent<typeof import("../components/checkout/PaymentConfirmation.vue")['default']>
 export const LazyCheckoutPaymentMethod: LazyComponent<typeof import("../components/checkout/PaymentMethod.vue")['default']>
+export const LazyGeneratorCheckoutPreview: LazyComponent<typeof import("../components/generator/CheckoutPreview.vue")['default']>
 export const LazyGeneratorSettingsCard: LazyComponent<typeof import("../components/generator/SettingsCard.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/app/components/nuxt-layout")['default']>

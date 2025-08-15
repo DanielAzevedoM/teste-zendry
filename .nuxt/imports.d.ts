@@ -33,6 +33,7 @@ export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useCardBrand } from '../composables/useCardBrand';
 export { useCheckout } from '../composables/useCheckout';
 export { useCoupon } from '../composables/useCoupon';
+export { useInstallments } from '../composables/useInstallments';
 export { usePayment } from '../composables/usePayment';
 export { onlyDigits, detectCardBrand, luhnValid, isValidCPF } from '../utils/cardBrand';
 export { formatCPF, formatCEP, formatExpiry } from '../utils/mask';

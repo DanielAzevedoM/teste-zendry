@@ -3,6 +3,35 @@ import type { Serialize, Simplify } from "nitropack/types";
 declare module "nitropack/types" {
   type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T
   interface InternalApi {
+    '/api/configs': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/configs.get').default>>>>
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/configs.post').default>>>>
+    }
+    '/api/configs/:id': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/configs/[id].delete').default>>>>
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/configs/[id].get').default>>>>
+    }
+    '/api/confirm-payment': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/confirm-payment.post').default>>>>
+    }
+    '/api/customers': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/customers.get').default>>>>
+    }
+    '/api/orders': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/orders.get').default>>>>
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/orders.post').default>>>>
+    }
+    '/api/orders/:id': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/orders/[id].delete').default>>>>
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/orders/[id].get').default>>>>
+      'put': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/orders/[id].put').default>>>>
+    }
+    '/api/orders/expire': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/orders/expire.post').default>>>>
+    }
+    '/api/payments': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/payments.post').default>>>>
+    }
     '/__nuxt_error': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/core/runtime/nitro/handlers/renderer').default>>>>
     }

@@ -11,6 +11,7 @@ declare global {
   const cachedEventHandler: typeof import('../../node_modules/.pnpm/nitropack@2.12.4_@netlify+blobs@9.1.2/node_modules/nitropack/dist/runtime/internal/cache')['cachedEventHandler']
   const cachedFunction: typeof import('../../node_modules/.pnpm/nitropack@2.12.4_@netlify+blobs@9.1.2/node_modules/nitropack/dist/runtime/internal/cache')['cachedFunction']
   const callNodeListener: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['callNodeListener']
+  const checkAndExpireOrders: typeof import('../../server/utils/expirationManager')['checkAndExpireOrders']
   const clearResponseHeaders: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['clearResponseHeaders']
   const clearSession: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['clearSession']
   const createApp: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['createApp']
@@ -94,6 +95,7 @@ declare global {
   const sanitizeStatusMessage: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['sanitizeStatusMessage']
   const sealSession: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['sealSession']
   const send: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['send']
+  const sendEmail: typeof import('../../server/utils/sendEmail')['sendEmail']
   const sendError: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['sendError']
   const sendIterable: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['sendIterable']
   const sendNoContent: typeof import('../../node_modules/.pnpm/h3@1.15.4/node_modules/h3')['sendNoContent']
@@ -139,3 +141,5 @@ export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils'
 export { appendCorsHeaders, appendCorsPreflightHeaders, appendHeader, appendHeaders, appendResponseHeader, appendResponseHeaders, assertMethod, callNodeListener, clearResponseHeaders, clearSession, createApp, createAppEventHandler, createError, createEvent, createEventStream, createRouter, defaultContentType, defineEventHandler, defineLazyEventHandler, defineNodeListener, defineNodeMiddleware, defineRequestMiddleware, defineResponseMiddleware, defineWebSocket, defineWebSocketHandler, deleteCookie, dynamicEventHandler, eventHandler, fetchWithEvent, fromNodeMiddleware, fromPlainHandler, fromWebHandler, getCookie, getHeader, getHeaders, getMethod, getProxyRequestHeaders, getQuery, getRequestFingerprint, getRequestHeader, getRequestHeaders, getRequestHost, getRequestIP, getRequestPath, getRequestProtocol, getRequestURL, getRequestWebStream, getResponseHeader, getResponseHeaders, getResponseStatus, getResponseStatusText, getRouterParam, getRouterParams, getSession, getValidatedQuery, getValidatedRouterParams, handleCacheHeaders, handleCors, isCorsOriginAllowed, isError, isEvent, isEventHandler, isMethod, isPreflightRequest, isStream, isWebResponse, lazyEventHandler, parseCookies, promisifyNodeListener, proxyRequest, readBody, readFormData, readMultipartFormData, readRawBody, readValidatedBody, removeResponseHeader, sanitizeStatusCode, sanitizeStatusMessage, sealSession, send, sendError, sendIterable, sendNoContent, sendProxy, sendRedirect, sendStream, sendWebResponse, serveStatic, setCookie, setHeader, setHeaders, setResponseHeader, setResponseHeaders, setResponseStatus, splitCookiesString, toEventHandler, toNodeListener, toPlainHandler, toWebHandler, toWebRequest, unsealSession, updateSession, useBase, useSession, writeEarlyHints } from 'h3';
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from '/home/daniel/Imagens/teste-zendry/node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/core/runtime/nitro/utils/paths';
 export { defineAppConfig } from '/home/daniel/Imagens/teste-zendry/node_modules/.pnpm/nuxt@4.0.3_@netlify+blobs@9.1.2_@parcel+watcher@2.5.1_@types+node@24.2.0_@vue+compiler-_f712703ffc624a46e3c4a9a36213b2e7/node_modules/nuxt/dist/core/runtime/nitro/utils/config';
+export { checkAndExpireOrders } from '/home/daniel/Imagens/teste-zendry/server/utils/expirationManager';
+export { sendEmail } from '/home/daniel/Imagens/teste-zendry/server/utils/sendEmail';

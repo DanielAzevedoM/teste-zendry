@@ -1,10 +1,12 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/h3@1.15.4/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getRequestIP, getResponseStatusText } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/h3@1.15.4/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
-import { resolve, dirname, join } from 'node:path';
+import path, { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { escapeHtml } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/@vue+shared@3.5.18/node_modules/@vue/shared/dist/shared.cjs.js';
+import { promises } from 'node:fs';
+import { v4 } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/uuid@11.1.0/node_modules/uuid/dist/esm/index.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/vue-bundle-renderer@2.1.2/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/ufo@1.6.1/node_modules/ufo/dist/index.mjs';
 import destr, { destr as destr$1 } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/destr@2.0.5/node_modules/destr/dist/index.mjs';
@@ -28,7 +30,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { stringify, uneval } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/devalue@5.1.1/node_modules/devalue/index.js';
 import { captureRawStackTrace, parseRawStackTrace } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/errx@0.1.0/node_modules/errx/dist/index.js';
 import { isVNode, toValue, isRef } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/vue@3.5.18_typescript@5.9.2/node_modules/vue/index.mjs';
-import { promises } from 'node:fs';
+import nodemailer from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/nodemailer@7.0.5/node_modules/nodemailer/lib/nodemailer.js';
 import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1 } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/pathe@2.0.3/node_modules/pathe/dist/index.mjs';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///home/daniel/Imagens/teste-zendry/node_modules/.pnpm/unhead@2.0.14/node_modules/unhead/dist/server.mjs';
@@ -1114,9 +1116,116 @@ function onConsoleLog(callback) {
   consola$1.wrapConsole();
 }
 
+function defineNitroPlugin(def) {
+  return def;
+}
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  // Porta para SSL
+  secure: true,
+  // `true` para porta 465, `false` para outras como a 587
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
+});
+const sendEmail = async ({ to, subject, html }) => {
+  try {
+    console.log(`[EMAIL] Tentando enviar e-mail para: ${to}`);
+    const info = await transporter.sendMail({
+      from: `"Seu E-commerce" <${process.env.GMAIL_USER}>`,
+      to,
+      subject,
+      html
+    });
+    console.log("\u2705 E-mail real enviado com sucesso! Message ID:", info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("\u274C Erro CR\xCDTICO ao enviar e-mail real:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+async function checkAndExpireOrders() {
+  var _a, _b;
+  console.log("[CRON] Verificando pedidos expirados...");
+  const ordersDbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  const configsDbPath = path.join(process.cwd(), "server", "db", "checkout-configs.json");
+  const customersDbPath = path.join(process.cwd(), "server", "db", "customers.json");
+  try {
+    const ordersFile = await promises.readFile(ordersDbPath, "utf-8");
+    let orders = JSON.parse(ordersFile);
+    const configsFile = await promises.readFile(configsDbPath, "utf-8");
+    const configs = JSON.parse(configsFile);
+    const customersFile = await promises.readFile(customersDbPath, "utf-8");
+    const customers = JSON.parse(customersFile);
+    let changesMade = false;
+    const pendingOrders = orders.filter((o) => o.status === "Em aguardo");
+    for (const order of pendingOrders) {
+      const config = configs.find((c) => c.id === order.configId);
+      if ((_b = (_a = config == null ? void 0 : config.paymentSettings) == null ? void 0 : _a.checkoutExpiration) == null ? void 0 : _b.enabled) {
+        const createdAt = new Date(order.createdAt).getTime();
+        const durationMs = config.paymentSettings.checkoutExpiration.durationMinutes * 60 * 1e3;
+        const expirationTime = createdAt + durationMs;
+        if (Date.now() > expirationTime) {
+          console.log(`[CRON] Pedido ${order.id} expirado. Alterando status.`);
+          order.status = "EXPIRADO";
+          changesMade = true;
+          let customerInfoForEmail;
+          const existingCustomer = customers.find((c) => c.email === order.customerIdentifier || c.cpf === order.customerIdentifier);
+          if (existingCustomer) {
+            customerInfoForEmail = existingCustomer;
+          } else {
+            customerInfoForEmail = {
+              email: order.customerIdentifier,
+              name: "Cliente"
+            };
+          }
+          if (customerInfoForEmail && customerInfoForEmail.email) {
+            console.log(`[CRON] Enviando e-mail de expira\xE7\xE3o para ${customerInfoForEmail.email}`);
+            await sendEmail({
+              to: customerInfoForEmail.email,
+              subject: "Sua oportunidade expirou, mas ainda h\xE1 tempo!",
+              html: `
+                            <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                                <h3>Ol\xE1 ${customerInfoForEmail.name.split(" ")[0]},</h3>
+                                <p>Vimos que o tempo para finalizar seu pedido <strong>${order.id}</strong> acabou.</p>
+                                <p>N\xE3o se preocupe! Se voc\xEA ainda tiver interesse, pode iniciar uma nova compra a qualquer momento.</p>
+                                <p>Estamos aqui se precisar de ajuda!</p>
+                                <br>
+                                <p><em>Equipe do Seu E-commerce</em></p>
+                            </div>
+                            `
+            });
+          }
+        }
+      }
+    }
+    if (changesMade) {
+      await promises.writeFile(ordersDbPath, JSON.stringify(orders, null, 2));
+      console.log("[CRON] Arquivo de pedidos atualizado com as expira\xE7\xF5es.");
+    } else {
+      console.log("[CRON] Nenhum pedido expirado encontrado.");
+    }
+  } catch (error) {
+    console.error("[CRON] Erro ao verificar expira\xE7\xE3o de pedidos:", error);
+  }
+}
+
+const _Nn0o1fiJmpsnkOYaCK6r0zz4Flhu_3BARaN5BulmJQ = defineNitroPlugin(() => {
+  checkAndExpireOrders();
+  setInterval(() => {
+    checkAndExpireOrders();
+  }, 15e3);
+  console.log('\u2705 [NITRO] "Cron Job" de expira\xE7\xE3o de pedidos iniciado.');
+});
+
 const plugins = [
   _aOVGLn8vnD0BT6b6L8tWXfvYYR0RsuCeFKNzgmXv8,
-_M7U8f0cw7EWgLMYOuYO2ZnSB9ITYCVPp8l70ulwYvk
+_M7U8f0cw7EWgLMYOuYO2ZnSB9ITYCVPp8l70ulwYvk,
+_Nn0o1fiJmpsnkOYaCK6r0zz4Flhu_3BARaN5BulmJQ
 ];
 
 const assets = {};
@@ -1526,10 +1635,36 @@ async function getIslandContext(event) {
   return ctx;
 }
 
+const _lazy_Jx0lFL = () => Promise.resolve().then(function () { return configs_get$1; });
+const _lazy_TDOxlj = () => Promise.resolve().then(function () { return configs_post$1; });
+const _lazy_PvqB0r = () => Promise.resolve().then(function () { return _id__delete$3; });
+const _lazy_3PN6qP = () => Promise.resolve().then(function () { return _id__get$3; });
+const _lazy_5RO2Aa = () => Promise.resolve().then(function () { return confirmPayment_post$1; });
+const _lazy_qo_C5S = () => Promise.resolve().then(function () { return customers_get$1; });
+const _lazy_Gep0sP = () => Promise.resolve().then(function () { return orders_get$1; });
+const _lazy_ixh8LK = () => Promise.resolve().then(function () { return orders_post$1; });
+const _lazy_BtlWUK = () => Promise.resolve().then(function () { return _id__delete$1; });
+const _lazy_CJ5Psk = () => Promise.resolve().then(function () { return _id__get$1; });
+const _lazy_Tzw0B5 = () => Promise.resolve().then(function () { return _id__put$1; });
+const _lazy_AHqLRg = () => Promise.resolve().then(function () { return expire_post$1; });
+const _lazy_x3slxi = () => Promise.resolve().then(function () { return payments_post$1; });
 const _lazy_2mPPDi = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
   { route: '', handler: _npUEVa, lazy: false, middleware: true, method: undefined },
+  { route: '/api/configs', handler: _lazy_Jx0lFL, lazy: true, middleware: false, method: "get" },
+  { route: '/api/configs', handler: _lazy_TDOxlj, lazy: true, middleware: false, method: "post" },
+  { route: '/api/configs/:id', handler: _lazy_PvqB0r, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/configs/:id', handler: _lazy_3PN6qP, lazy: true, middleware: false, method: "get" },
+  { route: '/api/confirm-payment', handler: _lazy_5RO2Aa, lazy: true, middleware: false, method: "post" },
+  { route: '/api/customers', handler: _lazy_qo_C5S, lazy: true, middleware: false, method: "get" },
+  { route: '/api/orders', handler: _lazy_Gep0sP, lazy: true, middleware: false, method: "get" },
+  { route: '/api/orders', handler: _lazy_ixh8LK, lazy: true, middleware: false, method: "post" },
+  { route: '/api/orders/:id', handler: _lazy_BtlWUK, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/orders/:id', handler: _lazy_CJ5Psk, lazy: true, middleware: false, method: "get" },
+  { route: '/api/orders/:id', handler: _lazy_Tzw0B5, lazy: true, middleware: false, method: "put" },
+  { route: '/api/orders/expire', handler: _lazy_AHqLRg, lazy: true, middleware: false, method: "post" },
+  { route: '/api/payments', handler: _lazy_x3slxi, lazy: true, middleware: false, method: "post" },
   { route: '/__nuxt_error', handler: _lazy_2mPPDi, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_2mPPDi, lazy: true, middleware: false, method: undefined }
@@ -1858,6 +1993,498 @@ const styles = {};
 const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const configs_get = defineEventHandler(async (event) => {
+  const dbPath = path.join(process.cwd(), "server", "db", "checkout-configs.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    const configs = JSON.parse(fileContent);
+    return configs;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return [];
+    }
+    console.error("Erro ao ler as configura\xE7\xF5es de checkout:", error);
+    return createError({
+      statusCode: 500,
+      statusMessage: "Erro Interno do Servidor ao buscar configura\xE7\xF5es"
+    });
+  }
+});
+
+const configs_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: configs_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const configs_post = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const dbPath = path.join(process.cwd(), "server", "db", "checkout-configs.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    const configs = JSON.parse(fileContent);
+    const newConfig = {
+      id: v4(),
+      // Gera um ID único
+      ...body
+    };
+    configs.push(newConfig);
+    await promises.writeFile(dbPath, JSON.stringify(configs, null, 2));
+    return {
+      statusCode: 201,
+      body: { message: "Configura\xE7\xE3o salva com sucesso!", config: newConfig }
+    };
+  } catch (error) {
+    console.error("Erro ao salvar configura\xE7\xE3o:", error);
+    return createError({
+      statusCode: 500,
+      statusMessage: "Erro interno do servidor"
+    });
+  }
+});
+
+const configs_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: configs_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__delete$2 = defineEventHandler(async (event) => {
+  const configId = getRouterParam(event, "id");
+  const dbPath = path.join(process.cwd(), "server", "db", "checkout-configs.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    let configs = JSON.parse(fileContent);
+    const configIndex = configs.findIndex((c) => c.id === configId);
+    if (configIndex === -1) {
+      return createError({ statusCode: 404, statusMessage: "Configura\xE7\xE3o n\xE3o encontrada" });
+    }
+    configs.splice(configIndex, 1);
+    await promises.writeFile(dbPath, JSON.stringify(configs, null, 2));
+    return { statusCode: 204 };
+  } catch (error) {
+    console.error("Erro ao excluir configura\xE7\xE3o:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor" });
+  }
+});
+
+const _id__delete$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__get$2 = defineEventHandler(async (event) => {
+  const configId = getRouterParam(event, "id");
+  const dbPath = path.join(process.cwd(), "server", "db", "checkout-configs.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    const configs = JSON.parse(fileContent);
+    const config = configs.find((c) => String(c.id) === String(configId));
+    if (!config) {
+      return createError({ statusCode: 404, statusMessage: `Configura\xE7\xE3o de Checkout com ID '${configId}' n\xE3o encontrada.` });
+    }
+    return config;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return createError({ statusCode: 404, statusMessage: "Arquivo de configura\xE7\xF5es n\xE3o encontrado." });
+    }
+    console.error("Erro ao ler configura\xE7\xE3o:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor" });
+  }
+});
+
+const _id__get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__get$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const confirmPayment_post = defineEventHandler(async (event) => {
+  const { orderId } = await readBody(event);
+  if (!orderId) {
+    return createError({ statusCode: 400, statusMessage: "ID do pedido n\xE3o fornecido." });
+  }
+  const ordersDbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  const paymentsDbPath = path.join(process.cwd(), "server", "db", "payments.json");
+  try {
+    const ordersFileContent = await promises.readFile(ordersDbPath, "utf-8");
+    let orders = JSON.parse(ordersFileContent);
+    const orderIndex = orders.findIndex((o) => o.id === orderId);
+    if (orderIndex === -1) {
+      return createError({ statusCode: 404, statusMessage: "Pedido n\xE3o encontrado." });
+    }
+    const order = orders[orderIndex];
+    if (order.status === "PAGO") {
+      return { success: true, message: `Pedido ${orderId} j\xE1 estava PAGO.` };
+    }
+    orders[orderIndex].status = "PAGO";
+    if (order.customerIdentifier) {
+      try {
+        const paymentsFileContent = await promises.readFile(paymentsDbPath, "utf-8");
+        const allPayments = JSON.parse(paymentsFileContent);
+        const orderPayments = allPayments.filter((p) => p.orderId === orderId);
+        const totalPaid = orderPayments.reduce((sum, payment) => sum + payment.amount, 0);
+        const totalBeforeCoupon = (order.amount || 0) - (order.discount || 0);
+        const couponDiscount = Math.max(0, totalBeforeCoupon - totalPaid);
+        const customerName = order.customerName ? order.customerName.split(" ")[0] : "Cliente";
+        const formatBRL = (value) => (value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+        await sendEmail({
+          to: order.customerIdentifier,
+          // Este é o e-mail correto agora
+          subject: `\u2705 Seu pedido ${orderId} foi confirmado!`,
+          html: `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <h2 style="color: #4CAF50;">Pagamento Aprovado!</h2>
+              <h3>Ol\xE1 ${customerName},</h3>
+              <p>Uma \xF3tima not\xEDcia! Confirmamos o pagamento do seu pedido <strong>${orderId}</strong>.</p>
+              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+              <h4>Resumo da Compra:</h4>
+              <p style="margin: 5px 0;"><strong>Valor:</strong> ${formatBRL(order.amount)}</p>
+              ${order.discount ? `<p style="margin: 5px 0;"><strong>Desconto:</strong> - ${formatBRL(order.discount)}</p>` : ""}
+              ${couponDiscount > 0 ? `<p style="margin: 5px 0;"><strong>Desconto (Cupom):</strong> - ${formatBRL(couponDiscount)}</p>` : ""}
+              <p style="margin: 5px 0; font-size: 1.1em;"><strong>Total Pago:</strong> <strong>${formatBRL(totalPaid)}</strong></p>
+              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+              <p>Agradecemos pela sua prefer\xEAncia!</p>
+              <p><em>Equipe do Seu E-commerce</em></p>
+            </div>
+          `
+        });
+      } catch (emailError) {
+        console.error(`[ERRO] O pagamento do pedido ${orderId} foi confirmado, mas falhou ao enviar o e-mail de confirma\xE7\xE3o.`, emailError);
+      }
+    }
+    await promises.writeFile(ordersDbPath, JSON.stringify(orders, null, 2));
+    return { success: true, message: `Pedido ${orderId} atualizado para PAGO e e-mail de confirma\xE7\xE3o enviado.` };
+  } catch (error) {
+    console.error("Erro ao confirmar pagamento:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor" });
+  }
+});
+
+const confirmPayment_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: confirmPayment_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const customers_get = defineEventHandler(async (event) => {
+  const { identifier } = getQuery$1(event);
+  const dbPath = path.join(process.cwd(), "server", "db", "customers.json");
+  if (!identifier) {
+    return createError({ statusCode: 400, statusMessage: "Identificador (email) n\xE3o fornecido" });
+  }
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    const customers = JSON.parse(fileContent);
+    const customer = customers.find((c) => c.email === identifier);
+    return customer || null;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    console.error("Erro ao ler clientes:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor" });
+  }
+});
+
+const customers_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: customers_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const orders_get = defineEventHandler(async (event) => {
+  const dbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    const orders = JSON.parse(fileContent);
+    return orders;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return [];
+    }
+    console.error("Erro ao ler os pedidos:", error);
+    return createError({
+      statusCode: 500,
+      statusMessage: "Erro Interno do Servidor ao buscar os pedidos"
+    });
+  }
+});
+
+const orders_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: orders_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const orders_post = defineEventHandler(async (event) => {
+  var _a, _b;
+  const newOrder = await readBody(event);
+  const dbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  const ipAddress = getRequestIP(event, { xForwardedFor: true });
+  if (!newOrder.paymentDetails) {
+    newOrder.paymentDetails = {};
+  }
+  newOrder.paymentDetails.ipAddress = ipAddress;
+  try {
+    let orders = [];
+    try {
+      const fileContent = await promises.readFile(dbPath, "utf-8");
+      orders = JSON.parse(fileContent);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    orders.push(newOrder);
+    await promises.writeFile(dbPath, JSON.stringify(orders, null, 2));
+    if (newOrder.customerIdentifier) {
+      const customersDbPath = path.join(process.cwd(), "server", "db", "customers.json");
+      const configsDbPath = path.join(process.cwd(), "server", "db", "checkout-configs.json");
+      try {
+        const customersFile = await promises.readFile(customersDbPath, "utf-8");
+        const customers = JSON.parse(customersFile);
+        const configsFile = await promises.readFile(configsDbPath, "utf-8");
+        const configs = JSON.parse(configsFile);
+        const config = configs.find((c) => c.id === newOrder.configId);
+        const existingCustomer = customers.find((c) => c.email === newOrder.customerIdentifier || c.cpf === newOrder.customerIdentifier);
+        let customerInfoForEmail;
+        if (existingCustomer) {
+          customerInfoForEmail = existingCustomer;
+        } else {
+          customerInfoForEmail = {
+            email: newOrder.customerIdentifier,
+            name: "Cliente"
+          };
+        }
+        const requestUrl = getRequestURL(event);
+        const checkoutLink = new URL(`/checkout/${newOrder.id}`, requestUrl.origin).href;
+        let emailSubject = "Finalize sua compra agora!";
+        let emailBodyParagraph;
+        if ((_b = (_a = config == null ? void 0 : config.paymentSettings) == null ? void 0 : _a.checkoutExpiration) == null ? void 0 : _b.enabled) {
+          const duration = config.paymentSettings.checkoutExpiration.durationMinutes;
+          emailBodyParagraph = `
+        <p>Notamos que voc\xEA iniciou um checkout para o pedido <strong>${newOrder.id}</strong>.</p>
+        <p>Ele ficar\xE1 reservado para voc\xEA por <strong>${duration} minutos</strong>.</p>
+        <p>N\xE3o perca tempo! Clique no bot\xE3o abaixo para finalizar sua compra:</p>
+      `;
+        } else {
+          emailBodyParagraph = `
+        <p>Vimos que voc\xEA iniciou uma compra para o pedido <strong>${newOrder.id}</strong>.</p>
+        <p>Seu pedido est\xE1 aguardando o pagamento. Clique no bot\xE3o abaixo para continuar de onde parou e finalizar sua compra:</p>
+      `;
+        }
+        await sendEmail({
+          to: customerInfoForEmail.email,
+          subject: emailSubject,
+          html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+       <h3>Ol\xE1 ${customerInfoForEmail.name.split(" ")[0]},</h3>
+       ${emailBodyParagraph}
+       <a href="${checkoutLink}" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #3FC583; text-decoration: none; border-radius: 5px; margin: 10px 0;">
+        Finalizar Compra Agora
+       </a>
+       <p>Se o bot\xE3o n\xE3o funcionar, copie e cole este link no seu navegador:</p>
+       <p><a href="${checkoutLink}">${checkoutLink}</a></p>
+       <br>
+       <p><em>Equipe do Seu E-commerce</em></p>
+      </div>
+     `
+        });
+      } catch (e) {
+        console.error("Falha ao tentar enviar email:", e);
+      }
+    }
+    return {
+      statusCode: 201,
+      body: newOrder
+    };
+  } catch (error) {
+    console.error("Erro ao criar pedido:", error);
+    return createError({
+      statusCode: 500,
+      statusMessage: "Erro interno do servidor ao salvar o pedido"
+    });
+  }
+});
+
+const orders_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: orders_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__delete = defineEventHandler(async (event) => {
+  const orderId = getRouterParam(event, "id");
+  const dbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    let orders = JSON.parse(fileContent);
+    const orderIndex = orders.findIndex((o) => o.id === orderId);
+    if (orderIndex === -1) {
+      return createError({ statusCode: 404, statusMessage: "Pedido n\xE3o encontrado" });
+    }
+    orders.splice(orderIndex, 1);
+    await promises.writeFile(dbPath, JSON.stringify(orders, null, 2));
+    return { statusCode: 204 };
+  } catch (error) {
+    console.error("Erro ao excluir pedido:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor" });
+  }
+});
+
+const _id__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__get = defineEventHandler(async (event) => {
+  const orderId = getRouterParam(event, "id");
+  const dbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    const orders = JSON.parse(fileContent);
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) {
+      return createError({ statusCode: 404, statusMessage: "Pedido n\xE3o encontrado" });
+    }
+    return order;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return createError({ statusCode: 404, statusMessage: "Pedido n\xE3o encontrado" });
+    }
+    console.error("Erro ao ler pedido:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor" });
+  }
+});
+
+const _id__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__put = defineEventHandler(async (event) => {
+  const orderId = getRouterParam(event, "id");
+  const updatedData = await readBody(event);
+  const dbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    let orders = JSON.parse(fileContent);
+    const orderIndex = orders.findIndex((o) => o.id === orderId);
+    if (orderIndex === -1) {
+      return createError({ statusCode: 404, statusMessage: "Pedido n\xE3o encontrado" });
+    }
+    if (orders[orderIndex].status !== "Em aguardo") {
+      return createError({ statusCode: 403, statusMessage: 'Apenas pedidos "Em aguardo" podem ser editados.' });
+    }
+    orders[orderIndex] = { ...orders[orderIndex], ...updatedData };
+    await promises.writeFile(dbPath, JSON.stringify(orders, null, 2));
+    return { statusCode: 200, body: orders[orderIndex] };
+  } catch (error) {
+    console.error("Erro ao editar pedido:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor" });
+  }
+});
+
+const _id__put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__put
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const expire_post = defineEventHandler(async (event) => {
+  const { orderId } = await readBody(event);
+  if (!orderId) {
+    return createError({ statusCode: 400, statusMessage: "ID do pedido n\xE3o fornecido." });
+  }
+  const dbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  try {
+    const fileContent = await promises.readFile(dbPath, "utf-8");
+    let orders = JSON.parse(fileContent);
+    const orderIndex = orders.findIndex((o) => o.id === orderId);
+    if (orderIndex === -1) {
+      return { success: false, message: "Pedido n\xE3o encontrado." };
+    }
+    if (orders[orderIndex].status === "Em aguardo") {
+      orders[orderIndex].status = "EXPIRADO";
+      await promises.writeFile(dbPath, JSON.stringify(orders, null, 2));
+      return { success: true, message: `Pedido ${orderId} expirado.` };
+    }
+    return { success: false, message: `Pedido j\xE1 est\xE1 com status '${orders[orderIndex].status}'.` };
+  } catch (error) {
+    console.error("Erro ao expirar pedido:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor" });
+  }
+});
+
+const expire_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: expire_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const payments_post = defineEventHandler(async (event) => {
+  const paymentData = await readBody(event);
+  const { orderId, method, amount, details, buyer } = paymentData;
+  if (!orderId || !method || !amount) {
+    return createError({ statusCode: 400, statusMessage: "Dados de pagamento incompletos." });
+  }
+  const ordersDbPath = path.join(process.cwd(), "server", "db", "orders.json");
+  const paymentsDbPath = path.join(process.cwd(), "server", "db", "payments.json");
+  try {
+    const ordersFileContent = await promises.readFile(ordersDbPath, "utf-8");
+    let orders = JSON.parse(ordersFileContent);
+    let payments = [];
+    try {
+      const paymentsFileContent = await promises.readFile(paymentsDbPath, "utf-8");
+      payments = JSON.parse(paymentsFileContent);
+    } catch (e) {
+      if (e.code !== "ENOENT") throw e;
+    }
+    const orderIndex = orders.findIndex((o) => o.id === orderId);
+    if (orderIndex === -1) {
+      return createError({ statusCode: 404, statusMessage: "Pedido n\xE3o encontrado." });
+    }
+    const order = orders[orderIndex];
+    if (order.status !== "Em aguardo") {
+      return createError({ statusCode: 403, statusMessage: `Este pedido j\xE1 est\xE1 com status '${order.status}'.` });
+    }
+    if (buyer && buyer.email) {
+      orders[orderIndex].customerIdentifier = buyer.email;
+      if (buyer.name) {
+        orders[orderIndex].customerName = buyer.name;
+      }
+      await promises.writeFile(ordersDbPath, JSON.stringify(orders, null, 2));
+    }
+    const newPayment = {
+      id: `txn_${v4()}`,
+      orderId,
+      amount,
+      method,
+      status: "PENDENTE",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      details
+    };
+    payments.push(newPayment);
+    await promises.writeFile(paymentsDbPath, JSON.stringify(payments, null, 2));
+    if (method === "pix") {
+      const qrCodeData = "00020101021226850014BR.GOV.BCB.PIX2560simulacao.com/pix/multi";
+      const qrCodeImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrCodeData)}`;
+      return {
+        ok: true,
+        qrCode: qrCodeData,
+        qrCodeImage: qrCodeImageUrl,
+        expiresAt: Date.now() + 5 * 60 * 1e3
+      };
+    }
+    if (method === "boleto") {
+      return {
+        ok: true,
+        boletoUrl: "https://www.google.com",
+        linhaDigitavel: "34191.79001 01043.510047 91020.101014 1 93250000150000"
+      };
+    }
+    return { ok: true, transactionId: newPayment.id };
+  } catch (error) {
+    console.error("Erro ao processar pagamento:", error);
+    return createError({ statusCode: 500, statusMessage: "Erro Interno do Servidor ao processar pagamento" });
+  }
+});
+
+const payments_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: payments_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function renderPayloadResponse(ssrContext) {
